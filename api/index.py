@@ -1,10 +1,9 @@
-from flask import Flask
+from flask import Flask, request
 import VisaBulletinChecker  # Import the module
 import os
 import json
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import requests
 
 app = Flask(__name__)
 

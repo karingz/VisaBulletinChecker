@@ -94,16 +94,20 @@ def run_check(return_month=False):
         from datetime import timezone as tz
         from zoneinfo import ZoneInfo
 
-        kst_time = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
-        pst_time = datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M PST")
-        cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M CST")
-        est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M EST")
+        kst_time = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M")
+        pst_time = datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M")
+        cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M")
+        est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M")
 
-        msg += f"<p>KST: {kst_time}</p>"
-        msg += f"<p>PST: {pst_time}</p>"
-        msg += f"<p>CST: {cst_time}</p>"
-        msg += f"<p>EST: {est_time}</p>"
-        msg += f"<p>Last updated: {last_updated}</p>"
+        msg += """
+        <table>
+            <tr><td colspan="2">Last updated time:</td></tr>
+            <tr><td>KST (Seoul)</td><td>{kst_time}</td></tr>
+            <tr><td>PST (LA)</td><td>{pst_time}</td></tr>
+            <tr><td>CST (Chicago)</td><td>{cst_time}</td></tr>
+            <tr><td>EST (NY)</td><td>{est_time}</td></tr>
+        </table>
+        """.format(kst_time=kst_time, pst_time=pst_time, cst_time=cst_time, est_time=est_time)
 
         if return_month:
             return msg, f"{bulletin_year}-{bulletin_month}"

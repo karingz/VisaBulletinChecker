@@ -4,6 +4,9 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import os
 
+BASE_URL = "https://travel.state.gov"
+INDEX_URL = f"{BASE_URL}/content/travel/en/legal/visa-law0/visa-bulletin.html"
+
 def get_month_slug(dt):
     return dt.strftime("visa-bulletin/%Y/visa-bulletin-for-%B-%Y.html").lower()
 

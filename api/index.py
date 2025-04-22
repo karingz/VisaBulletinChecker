@@ -47,19 +47,19 @@ def get_db_connection():
     return psycopg2.connect(DB_URL)
 
 def load_subscriptions():
-    # Load emails from the database
     conn = get_db_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT email FROM subscriptions")
-        rows = cur.fetchall()
-    conn.close()
+        emails = [row[0] for row in cur.fetchall()]
 
-    # Load last_sent_month from environment variable
-    last_sent_month = os.getenv("LAST_SENT_MONTH", "")
-    return {"emails": [row[0] for row in rows], "last_sent_month": last_sent_month}
+        cur.execute("SELECT value FROM metadata WHERE key = 'last_sent_month'")
+        last_sent_month = cur.fetchone()
+        last_sent_month = last_sent_month[0] if last_sent_month else ""
+
+    conn.close()
+    return {"emails": emails, "last_sent_month": last_sent_month}
 
 def save_subscriptions(data):
-    # Save emails to the database
     conn = get_db_connection()
     with conn.cursor() as cur:
         for email in data["emails"]:
@@ -67,11 +67,15 @@ def save_subscriptions(data):
                 "INSERT INTO subscriptions (email) VALUES (%s) ON CONFLICT (email) DO NOTHING",
                 (email,),
             )
+
+        cur.execute(
+            "INSERT INTO metadata (key, value) VALUES ('last_sent_month', %s) "
+            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+            (data["last_sent_month"],),
+        )
+
     conn.commit()
     conn.close()
-
-    # Save last_sent_month to environment variable
-    os.environ["LAST_SENT_MONTH"] = data["last_sent_month"]
 
 def get_subscriber_count():
     subs = load_subscriptions()
@@ -120,7 +124,7 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
     if email not in subs["emails"]:
         subs["emails"].append(email)
 
-    if datetime.strptime(subs["last_sent_month"], "%Y-%B").strftime("%Y-%m") != datetime.strptime(bulletin_month, "%Y-%B").strftime("%Y-%m"):
+    if subs["last_sent_month"] != bulletin_month:
         # Send real email
         subject = f"Visa Bulletin for {bulletin_month}"
         result = result.split("Last updated time:")[0]  # Remove the last updated time

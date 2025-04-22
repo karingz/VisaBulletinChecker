@@ -42,15 +42,33 @@ def update_hit_counts():
     save_hits(hits)
     return hits
 
+
+import psycopg2
+
+DB_URL = os.getenv("DATABASE_URL")  # Set this in your Vercel environment variables
+
+
+def get_db_connection():
+    return psycopg2.connect(DB_URL)
+
 def load_subscriptions():
-    if not os.path.exists(SUB_FILE):
-        return {"emails": [], "last_sent_month": ""}
-    with open(SUB_FILE, "r") as f:
-        return json.load(f)
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute("SELECT email, last_sent_month FROM subscriptions")
+        rows = cur.fetchall()
+    conn.close()
+    return {"emails": [row[0] for row in rows], "last_sent_month": rows[0][1] if rows else ""}
 
 def save_subscriptions(data):
-    with open(SUB_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        for email in data["emails"]:
+            cur.execute(
+                "INSERT INTO subscriptions (email, last_sent_month) VALUES (%s, %s) ON CONFLICT (email) DO UPDATE SET last_sent_month = %s",
+                (email, data["last_sent_month"], data["last_sent_month"]),
+            )
+    conn.commit()
+    conn.close()
 
 def get_subscriber_count():
     subs = load_subscriptions()
@@ -99,7 +117,8 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
     if subs["last_sent_month"] != bulletin_month:
         # Send real email
         subject = f"Visa Bulletin for {bulletin_month}"
-        body = f"<h2>📢 [Visa Bulletin] {bulletin_month} Released!</h2><hr>{result}"
+        result = result.split("Last updated time:")[0]  # Remove the last updated time
+        body = f"{result}"
         send_email(email, subject, body)
 
         subs["last_sent_month"] = bulletin_month

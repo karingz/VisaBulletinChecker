@@ -86,9 +86,7 @@ def run_check():
             {table_html}
             """
         last_updated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-        return {
-            "message": msg,
-            "last_updated": last_updated
-        }
+        msg += f"<p>Last updated: {last_updated}</p>"
+        return msg
     except Exception as e:
         return f"<p>❌ An error occurred: {str(e)}</p>"

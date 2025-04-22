@@ -1,0 +1,25 @@
+name: Visa Bulletin Checker
+
+on:
+  schedule:
+    # Run once every hour
+    - cron: '0 * * * *'
+  workflow_dispatch:  # Allows manual trigger from the GitHub UI
+
+jobs:
+  run-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 python-dateutil
+
+      - name: Run visa bulletin checker
+        run: python scripts/visa_checker.py

@@ -85,6 +85,10 @@ def run_check():
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
             {table_html}
             """
-        return msg
+        last_updated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        return {
+            "message": msg,
+            "last_updated": last_updated
+        }
     except Exception as e:
         return f"<p>❌ An error occurred: {str(e)}</p>"

@@ -82,7 +82,7 @@ def send_email(to_email, subject, body):
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 
-def handle_subscription(email, bulletin_month, unsubscribe=False):
+def handle_subscription(email, result, bulletin_month, unsubscribe=False):
     subs = load_subscriptions()
 
     if unsubscribe:
@@ -99,7 +99,7 @@ def handle_subscription(email, bulletin_month, unsubscribe=False):
     if subs["last_sent_month"] != bulletin_month:
         # Send real email
         subject = f"Visa Bulletin for {bulletin_month}"
-        body = f"<h2>📢 [Visa Bulletin] {bulletin_month} Released!</h2>"
+        body = f"<h2>📢 [Visa Bulletin] {bulletin_month} Released!</h2><hr>{result}"
         send_email(email, subject, body)
 
         subs["last_sent_month"] = bulletin_month
@@ -132,7 +132,7 @@ def check_bulletin():
         email = request.form.get("email")
         unsubscribe = request.form.get("unsubscribe") == "on"
         if email:
-            subs_msg = handle_subscription(email, bulletin_month, unsubscribe=unsubscribe)
+            subs_msg = handle_subscription(email, result, bulletin_month, unsubscribe=unsubscribe)
 
     hit_info = f"""
     <p>📊 Page Hits:</p>

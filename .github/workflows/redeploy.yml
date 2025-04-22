@@ -1,0 +1,21 @@
+name: Scheduled Redeploy
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"  # Every 10 minutes
+  workflow_dispatch:
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make a fake commit to trigger Vercel
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git clone https://github.com/${{ github.repository }} repo
+          cd repo
+          date > timestamp.txt
+          git add timestamp.txt
+          git commit -m "Trigger redeploy"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main

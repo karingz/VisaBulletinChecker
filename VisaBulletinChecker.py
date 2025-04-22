@@ -91,12 +91,13 @@ def run_check(return_month=False):
         last_updated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
         # Get current time in KST, Texas, and California
-        from pytz import timezone
+        from datetime import timezone as tz
+        from zoneinfo import ZoneInfo
 
-        kst_time = datetime.now(timezone("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
-        pst_time = datetime.now(timezone("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M PST")
-        cst_time = datetime.now(timezone("America/Chicago")).strftime("%Y-%m-%d %H:%M CST")
-        est_time = datetime.now(timezone("America/New_York")).strftime("%Y-%m-%d %H:%M EST")
+        kst_time = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
+        pst_time = datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M PST")
+        cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M CST")
+        est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M EST")
 
         msg += f"<p>KST: {kst_time}</p>"
         msg += f"<p>PST: {pst_time}</p>"

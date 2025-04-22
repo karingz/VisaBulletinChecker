@@ -52,7 +52,7 @@ def load_subscriptions():
         cur.execute("SELECT email FROM subscriptions")
         emails = [row[0] for row in cur.fetchall()]
 
-        cur.execute("SELECT value FROM metadata WHERE key = 'last_sent_month'")
+        cur.execute("SELECT last_sent_month FROM subscriptions LIMIT 1")
         last_sent_month = cur.fetchone()
         last_sent_month = last_sent_month[0] if last_sent_month else ""
 
@@ -68,11 +68,11 @@ def save_subscriptions(data):
                 (email,),
             )
 
-        cur.execute(
-            "INSERT INTO metadata (key, value) VALUES ('last_sent_month', %s) "
-            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
-            (data["last_sent_month"],),
-        )
+        if data["last_sent_month"]:
+            cur.execute(
+                "UPDATE subscriptions SET last_sent_month = %s WHERE email = %s",
+                (data["last_sent_month"], data["emails"][0]),  # Update for the first email
+            )
 
     conn.commit()
     conn.close()

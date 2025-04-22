@@ -108,4 +108,7 @@ def run_check(return_month=False):
             return msg, f"{bulletin_year}-{bulletin_month}"
         return msg
     except Exception as e:
-        return f"<p>❌ An error occurred: {str(e)}</p>"
+        error_msg = f"<p>❌ An error occurred: {str(e)}</p>"
+        if return_month:
+            return error_msg, ""  # Ensure two values are returned
+        return error_msg

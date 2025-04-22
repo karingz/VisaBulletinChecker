@@ -132,18 +132,7 @@ def check_bulletin():
     hits = update_hit_counts()
     subscriber_count = get_subscriber_count()
 
-    result, bulletin_month, release_flag = VisaBulletinChecker.run_check(return_month=True)
-
-    # Send email to all subscribers if a new bulletin is released
-    if release_flag:
-        subs = load_subscriptions()
-        for email in subs["emails"]:
-            subject = f"Visa Bulletin for {bulletin_month}"
-            body = result.split("Last updated time:")[0]  # Remove the last updated time
-            send_email(email, subject, body)
-        # Update the last sent month
-        subs["last_sent_month"] = bulletin_month
-        save_subscriptions(subs)
+    result, bulletin_month = VisaBulletinChecker.run_check(return_month=True)
 
     email_form = """
         <form method="post">

@@ -57,12 +57,12 @@ def run_check():
             return "<p>❌ Could not find the target table.</p>"
 
         # Step 5: Extract the table into clean HTML format
-        table_html = '<table border="1" style="border-collapse: collapse; width: 100%;">'
+        table_html = '<table width="100%" border="1" cellspacing="0" cellpadding="3">'
         for row in target_table.select("tr"):
             table_html += "<tr>"
             for col in row.find_all(["th", "td"]):
                 tag = "th" if col.name == "th" else "td"
-                table_html += f"<{tag} style='padding: 8px; text-align: left;'>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
+                table_html += f"<{tag}>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
             table_html += "</tr>"
         table_html += "</table>"
 

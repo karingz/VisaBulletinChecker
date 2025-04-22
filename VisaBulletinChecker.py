@@ -87,8 +87,23 @@ def run_check(return_month=False):
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
             {table_html}
             """
+
         last_updated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+
+        # Get current time in KST, Texas, and California
+        from pytz import timezone
+
+        kst_time = datetime.now(timezone("Asia/Seoul")).strftime("%Y-%m-%d %H:%M KST")
+        pst_time = datetime.now(timezone("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M PST")
+        cst_time = datetime.now(timezone("America/Chicago")).strftime("%Y-%m-%d %H:%M CST")
+        est_time = datetime.now(timezone("America/New_York")).strftime("%Y-%m-%d %H:%M EST")
+
+        msg += f"<p>KST: {kst_time}</p>"
+        msg += f"<p>PST: {pst_time}</p>"
+        msg += f"<p>CST: {cst_time}</p>"
+        msg += f"<p>EST: {est_time}</p>"
         msg += f"<p>Last updated: {last_updated}</p>"
+
         if return_month:
             return msg, f"{bulletin_year}-{bulletin_month}"
         return msg

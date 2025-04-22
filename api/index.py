@@ -47,23 +47,31 @@ def get_db_connection():
     return psycopg2.connect(DB_URL)
 
 def load_subscriptions():
+    # Load emails from the database
     conn = get_db_connection()
     with conn.cursor() as cur:
-        cur.execute("SELECT email, last_sent_month FROM subscriptions")
+        cur.execute("SELECT email FROM subscriptions")
         rows = cur.fetchall()
     conn.close()
-    return {"emails": [row[0] for row in rows], "last_sent_month": rows[0][1] if rows else ""}
+
+    # Load last_sent_month from environment variable
+    last_sent_month = os.getenv("LAST_SENT_MONTH", "")
+    return {"emails": [row[0] for row in rows], "last_sent_month": last_sent_month}
 
 def save_subscriptions(data):
+    # Save emails to the database
     conn = get_db_connection()
     with conn.cursor() as cur:
         for email in data["emails"]:
             cur.execute(
-                "INSERT INTO subscriptions (email, last_sent_month) VALUES (%s, %s) ON CONFLICT (email) DO UPDATE SET last_sent_month = %s",
-                (email, data["last_sent_month"], data["last_sent_month"]),
+                "INSERT INTO subscriptions (email) VALUES (%s) ON CONFLICT (email) DO NOTHING",
+                (email,),
             )
     conn.commit()
     conn.close()
+
+    # Save last_sent_month to environment variable
+    os.environ["LAST_SENT_MONTH"] = data["last_sent_month"]
 
 def get_subscriber_count():
     subs = load_subscriptions()
@@ -109,7 +117,7 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
     if email not in subs["emails"]:
         subs["emails"].append(email)
 
-    if subs["last_sent_month"] != bulletin_month:
+    if datetime.strptime(subs["last_sent_month"], "%Y-%B").strftime("%Y-%m") != datetime.strptime(bulletin_month, "%Y-%B").strftime("%Y-%m"):
         # Send real email
         subject = f"Visa Bulletin for {bulletin_month}"
         result = result.split("Last updated time:")[0]  # Remove the last updated time

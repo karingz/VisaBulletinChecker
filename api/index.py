@@ -86,7 +86,7 @@ SMTP_PORT = 587
 SMTP_USER = os.getenv("SMTP_USER")  # Set your email in environment variables
 SMTP_PASS = os.getenv("SMTP_PASS")  # Set your email password in environment variables
 
-def send_email(to_email, subject, body):
+def send_email(to_email, subject, body, bulletin_month):
     try:
         msg = MIMEMultipart()
         msg["From"] = SMTP_USER
@@ -100,6 +100,9 @@ def send_email(to_email, subject, body):
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
         print(f"📧 Email sent to {to_email}")
+
+        # Update LAST_SENT_MONTH environment variable
+        os.environ["LAST_SENT_MONTH"] = bulletin_month
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 
@@ -122,7 +125,7 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
         subject = f"Visa Bulletin for {bulletin_month}"
         result = result.split("Last updated time:")[0]  # Remove the last updated time
         body = f"{result}"
-        send_email(email, subject, body)
+        send_email(email, subject, body, bulletin_month)
 
         subs["last_sent_month"] = bulletin_month
         save_subscriptions(subs)

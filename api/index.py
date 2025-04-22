@@ -52,8 +52,16 @@ def save_subscriptions(data):
     with open(SUB_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-def handle_subscription(email, bulletin_month):
+def handle_subscription(email, bulletin_month, unsubscribe=False):
     subs = load_subscriptions()
+
+    if unsubscribe:
+        if email in subs["emails"]:
+            subs["emails"].remove(email)
+            save_subscriptions(subs)
+            return f"<p>❌ Unsubscribed: {email}</p>"
+        else:
+            return f"<p>ℹ️ Email not found: {email}</p>"
 
     if email not in subs["emails"]:
         subs["emails"].append(email)
@@ -72,20 +80,24 @@ def handle_subscription(email, bulletin_month):
 def check_bulletin():
     hits = update_hit_counts()
 
+    result, bulletin_month = VisaBulletinChecker.run_check(return_month=True)
+
     email_form = """
         <form method="post">
-            <input type="email" name="email" placeholder="Enter email to subscribe" required>
-            <button type="submit">Subscribe</button>
+            <input type="email" name="email" placeholder="Enter email" required>
+            <label style="margin-left: 10px;">
+                <input type="checkbox" name="unsubscribe"> Unsubscribe
+            </label>
+            <button type="submit">Submit</button>
         </form><br/>
     """
 
-    result, bulletin_month = VisaBulletinChecker.run_check(return_month=True)
-
-    msg = ""
+    subs_msg = ""
     if request.method == "POST":
         email = request.form.get("email")
+        unsubscribe = request.form.get("unsubscribe") == "on"
         if email:
-            msg = handle_subscription(email, bulletin_month)
+            subs_msg = handle_subscription(email, bulletin_month, unsubscribe=unsubscribe)
 
     hit_info = f"""
     <p>📊 Page Hits:</p>
@@ -96,7 +108,7 @@ def check_bulletin():
     </ul>
     """
 
-    return f"{email_form}{msg}{hit_info}<hr><pre>{result}</pre>"
+    return f"{hit_info}<hr><pre>{result}</pre>{email_form}{subs_msg}"
 
 if __name__ == "__main__":
     app.run()

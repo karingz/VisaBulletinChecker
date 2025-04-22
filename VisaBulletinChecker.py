@@ -19,7 +19,6 @@ def run_check():
     try:
         # Step 1: Determine which months to check
         now = datetime.now()
-        now = datetime(2025, 5, 1)  # For testing purposes, set a specific date
         slugs_to_try = [get_month_slug(now + relativedelta(months=1)), get_month_slug(now)]
 
         # Step 2: Fetch bulletin links from index page
@@ -40,7 +39,7 @@ def run_check():
                 break
 
         if not matched_link:
-            return "🔁 No bulletin found for this or last month."
+            return "<p>🔁 No bulletin found for this or last month.</p>"
 
         # Step 4: Scrape the bulletin page and find the target table
         resp = requests.get(matched_link)
@@ -55,14 +54,17 @@ def run_check():
                     break
 
         if not target_table:
-            return "❌ Could not find the target table."
+            return "<p>❌ Could not find the target table.</p>"
 
-        # Step 5: Extract the table into clean text format
-        rows = []
+        # Step 5: Extract the table into clean HTML format
+        table_html = '<table border="1" style="border-collapse: collapse; width: 100%;">'
         for row in target_table.select("tr"):
-            cols = [col.get_text(strip=True).replace('\xa0', ' ') for col in row.find_all(["th", "td"])]
-            rows.append(" | ".join(cols))
-        table_text = "\n".join(rows)
+            table_html += "<tr>"
+            for col in row.find_all(["th", "td"]):
+                tag = "th" if col.name == "th" else "td"
+                table_html += f"<{tag} style='padding: 8px; text-align: left;'>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
+            table_html += "</tr>"
+        table_html += "</table>"
 
         # Step 6: Format message and return it
         bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
@@ -70,22 +72,19 @@ def run_check():
         if datetime.strptime(bulletin_month, "%B").month == (now + relativedelta(months=1)).month:
             message_month = bulletin_month
             msg = f"""
-📢 [Visa Bulletin] {message_month}-{bulletin_year} Released!
-
-🔗 {matched_link}
-
-📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:
-{table_text}
-"""
+            <h2>📢 [Visa Bulletin] {message_month}-{bulletin_year} Released!</h2>
+            <p>🔗 <a href="{matched_link}" target="_blank">{matched_link}</a></p>
+            <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
+            {table_html}
+            """
         else:
             msg = f"""
-📢 [Visa Bulletin] {(now + relativedelta(months=1)).strftime('%B')}-{now.year} hasn't been released yet! Showing the bulletin for {bulletin_month}-{bulletin_year}.
-
-🔗 {matched_link}
-
-📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:
-{table_text}
-"""
+            <h2>📢 [Visa Bulletin] {(now + relativedelta(months=1)).strftime('%B')}-{now.year} hasn't been released yet!</h2>
+            <p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p>
+            <p>🔗 <a href="{matched_link}" target="_blank">{matched_link}</a></p>
+            <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
+            {table_html}
+            """
         return msg
     except Exception as e:
-        return f"❌ An error occurred: {str(e)}"
+        return f"<p>❌ An error occurred: {str(e)}</p>"

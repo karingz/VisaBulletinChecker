@@ -19,7 +19,7 @@ def run_check(return_month=False):
     try:
         # Step 1: Determine which months to check
         now = datetime.now()
-        now = datetime(2025, 2, 1)
+        now = datetime(2025, 1, 1)
         slugs_to_try = [get_month_slug(now + relativedelta(months=1)), get_month_slug(now)]
 
         # Step 2: Fetch bulletin links from index page
@@ -70,9 +70,11 @@ def run_check(return_month=False):
 
         # Step 6: Format message and return it
         bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
+        release_flag = False
 
         if datetime.strptime(bulletin_month, "%B").month == (now + relativedelta(months=1)).month:
             message_month = bulletin_month
+            release_flag = True
             msg = f"""
             <h2>📢 [Visa Bulletin] {message_month}-{bulletin_year} Released!</h2>
             <p>🔗 <a href="{matched_link}" target="_blank">{matched_link}</a></p>
@@ -80,6 +82,7 @@ def run_check(return_month=False):
             {table_html}
             """
         else:
+            release_flag = Flase
             msg = f"""
             <h2>📢 [Visa Bulletin] {(now + relativedelta(months=1)).strftime('%B')}-{now.year} hasn't been released yet!</h2>
             <p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p>
@@ -110,7 +113,7 @@ def run_check(return_month=False):
         """.format(kst_time=kst_time, pst_time=pst_time, cst_time=cst_time, est_time=est_time)
 
         if return_month:
-            return msg, f"{bulletin_year}-{bulletin_month}"
+            return msg, f"{bulletin_year}-{bulletin_month}", release_flag
         return msg
     except Exception as e:
         error_msg = f"<p>❌ An error occurred: {str(e)}</p>"

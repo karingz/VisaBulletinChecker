@@ -3,6 +3,7 @@ import VisaBulletinChecker  # Import the module
 import os
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+import json
 
 app = Flask(__name__)
 HIT_FILE = "/tmp/page_hits.json"

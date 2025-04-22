@@ -7,17 +7,14 @@ from dateutil.relativedelta import relativedelta
 
 app = Flask(__name__)
 
-HIT_FILE = "/tmp/page_hits.json"
-
 def load_hits():
-    if not os.path.exists(HIT_FILE):
-        return {"total": 0, "monthly": {}, "daily": {}}
-    with open(HIT_FILE, "r") as f:
-        return json.load(f)
+    # Load hit counts from environment variables
+    hits_json = os.getenv("HIT_COUNT", '{"total": 0, "monthly": {}, "daily": {}}')
+    return json.loads(hits_json)
 
 def save_hits(data):
-    with open(HIT_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    # Save hit counts back to environment variables
+    os.environ["HIT_COUNT"] = json.dumps(data)
 
 def update_hit_counts():
     hits = load_hits()

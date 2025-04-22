@@ -4,6 +4,14 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import os
 
+def get_month_slug(dt):
+    return dt.strftime("visa-bulletin/%Y/visa-bulletin-for-%B-%Y.html").lower()
+
+def get_bulletin_date_from_slug(slug):
+    parts = slug.split("/")[-1].replace("visa-bulletin-for-", "").replace(".html", "")
+    month_name, year = parts.split("-")
+    return month_name.capitalize(), year
+
 def run_check():
     try:
         # Step 1: Determine which months to check

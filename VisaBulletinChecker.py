@@ -19,7 +19,7 @@ def run_check(return_month=False):
     try:
         # Step 1: Determine which months to check
         now = datetime.now()
-        now = datetime(2025, 1, 1)
+        now = datetime(2025, 2, 1)
         slugs_to_try = [get_month_slug(now + relativedelta(months=1)), get_month_slug(now)]
 
         # Step 2: Fetch bulletin links from index page

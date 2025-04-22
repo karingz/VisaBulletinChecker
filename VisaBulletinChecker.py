@@ -58,11 +58,12 @@ def run_check():
 
         # Step 5: Extract the table into clean HTML format
         table_html = '<table width="100%" border="1" cellspacing="0" cellpadding="3">'
-        for row in target_table.select("tr"):
+        for row_index, row in enumerate(target_table.select("tr"), start=1):
             table_html += "<tr>"
-            for col in row.find_all(["th", "td"]):
+            for col_index, col in enumerate(row.find_all(["th", "td"]), start=1):
                 tag = "th" if col.name == "th" else "td"
-                table_html += f"<{tag}>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
+                style = ' style="background-color: yellow; font-weight: bold;"' if row_index == 3 and col_index == 2 else ""
+                table_html += f"<{tag}{style}>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
             table_html += "</tr>"
         table_html += "</table>"
 

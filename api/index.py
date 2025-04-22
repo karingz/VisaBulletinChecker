@@ -1,12 +1,14 @@
 from flask import Flask
 import VisaBulletinChecker  # Import the module
 import os
+import json
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import json
 
 app = Flask(__name__)
+
 HIT_FILE = "/tmp/page_hits.json"
+SUB_FILE = "/tmp/subscriptions.json"  # or use a persistent DB later
 
 def load_hits():
     if not os.path.exists(HIT_FILE):
@@ -40,11 +42,51 @@ def update_hit_counts():
     save_hits(hits)
     return hits
 
-@app.route("/")
+def load_subscriptions():
+    if not os.path.exists(SUB_FILE):
+        return {"emails": [], "last_sent_month": ""}
+    with open(SUB_FILE, "r") as f:
+        return json.load(f)
+
+def save_subscriptions(data):
+    with open(SUB_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+def handle_subscription(email, bulletin_month):
+    subs = load_subscriptions()
+
+    if email not in subs["emails"]:
+        subs["emails"].append(email)
+
+    if subs["last_sent_month"] != bulletin_month:
+        print(f"📧 Simulated sending bulletin to: {email}")
+        subs["last_sent_month"] = bulletin_month
+        save_subscriptions(subs)
+        return f"<p>✅ Subscribed and email sent to: {email}</p>"
+    else:
+        save_subscriptions(subs)
+        return f"<p>✅ Subscribed. Email already sent for {bulletin_month}.</p>"
+
+
+@app.route("/", methods=["GET", "POST"])
 def check_bulletin():
     hits = update_hit_counts()
 
-    # Display hit info
+    email_form = """
+        <form method="post">
+            <input type="email" name="email" placeholder="Enter email to subscribe" required>
+            <button type="submit">Subscribe</button>
+        </form><br/>
+    """
+
+    result, bulletin_month = VisaBulletinChecker.run_check(return_month=True)
+
+    msg = ""
+    if request.method == "POST":
+        email = request.form.get("email")
+        if email:
+            msg = handle_subscription(email, bulletin_month)
+
     hit_info = f"""
     <p>📊 Page Hits:</p>
     <ul>
@@ -54,9 +96,7 @@ def check_bulletin():
     </ul>
     """
 
-    # Main content
-    msg = VisaBulletinChecker.run_check()
-    return f"{hit_info}<hr><pre>{msg}</pre>"
+    return f"{email_form}{msg}{hit_info}<hr><pre>{result}</pre>"
 
 if __name__ == "__main__":
     app.run()

@@ -15,10 +15,11 @@ def get_bulletin_date_from_slug(slug):
     month_name, year = parts.split("-")
     return month_name.capitalize(), year
 
-def run_check():
+def run_check(return_month=False):
     try:
         # Step 1: Determine which months to check
         now = datetime.now()
+        now = datetime(2025, 1, 1)
         slugs_to_try = [get_month_slug(now + relativedelta(months=1)), get_month_slug(now)]
 
         # Step 2: Fetch bulletin links from index page
@@ -88,6 +89,8 @@ def run_check():
             """
         last_updated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
         msg += f"<p>Last updated: {last_updated}</p>"
+        if return_month:
+            return msg, f"{bulletin_year}-{bulletin_month}"
         return msg
     except Exception as e:
         return f"<p>❌ An error occurred: {str(e)}</p>"

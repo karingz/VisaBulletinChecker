@@ -1,5 +1,6 @@
 from flask import Flask
 import VisaBulletinChecker  # Import the module
+import os
 
 app = Flask(__name__)
 HIT_FILE = "/tmp/page_hits.json"

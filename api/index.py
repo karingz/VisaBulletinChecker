@@ -1,11 +1,11 @@
-from flask import Flask, jsonify
-import visa_bulletin_checker  # Rename your script as a module
+from flask import Flask
+import VisaBulletinChecker  # Import the module
 
 app = Flask(__name__)
 
 @app.route("/")
 def check_bulletin():
-    result = visa_bulletin_checker.run_check()  # Move logic into a function
+    result = VisaBulletinChecker.run_check()  # Call the function
     return f"<pre>{result}</pre>"
 
 if __name__ == "__main__":

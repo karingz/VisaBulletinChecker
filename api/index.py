@@ -167,6 +167,24 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
         return f"<p>✅ Subscribed. Email already sent for {bulletin_month}.</p>"
 
 
+@app.route("/unsubscribe", methods=["GET"])
+def unsubscribe():
+    email = request.args.get("email")
+    if not email:
+        return "<p>❌ Email not provided.</p>", 400
+
+    subs = load_subscriptions()
+    for subscription in subs:
+        if subscription["email"] == email:
+            conn = get_db_connection()
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM subscriptions WHERE email = %s", (email,))
+            conn.commit()
+            conn.close()
+            return f"<p>✅ Successfully unsubscribed: {email}</p>"
+
+    return f"<p>ℹ️ Email not found: {email}</p>", 404
+
 @app.route("/", methods=["GET", "POST"])
 def check_bulletin():
     hits = update_hit_counts()

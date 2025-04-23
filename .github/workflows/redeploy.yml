@@ -2,7 +2,7 @@ name: Scheduled Redeploy
 
 on:
   schedule:
-    - cron: "*/20 * * * *"  # Every 20 minutes
+    - cron: "*/30 * * * *"  # Every 30 minutes
   workflow_dispatch:
 
 jobs:

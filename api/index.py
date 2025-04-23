@@ -196,8 +196,8 @@ def check_bulletin():
     <p>📊 Page Hits:</p>
     <ul>
         <li>Total: {hits['total']}</li>
-        <li>Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly'][datetime.utcnow().strftime('%Y-%m')]}</li>
-        <li>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily'][datetime.utcnow().strftime('%Y-%m-%d')]}</li>
+        <li>Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']}</li>
+        <li>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily']}</li>
     </ul>
     <p>👥 Subscriber Count: {subscriber_count}</p>
     """

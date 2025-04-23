@@ -10,16 +10,18 @@ app = Flask(__name__)
 def load_hits():
     conn = get_db_connection()
     with conn.cursor() as cur:
-        cur.execute("SELECT total, daily, monthly FROM hit_counts LIMIT 1")
+        cur.execute("SELECT total, daily, monthly, last_daily_reset, last_monthly_reset FROM hit_counts LIMIT 1")
         row = cur.fetchone()
         if row:
             hits = {
                 "total": row[0],
-                "daily": json.loads(row[1]),
-                "monthly": json.loads(row[2]),
+                "daily": row[1],
+                "monthly": row[2],
+                "last_daily_reset": row[3],
+                "last_monthly_reset": row[4],
             }
         else:
-            hits = {"total": 0, "daily": {}, "monthly": {}}
+            hits = {"total": 0, "daily": 0, "monthly": 0, "last_daily_reset": None, "last_monthly_reset": None}
     conn.close()
     return hits
 
@@ -29,10 +31,10 @@ def save_hits(data):
         cur.execute(
             """
             UPDATE hit_counts
-            SET total = %s, daily = %s, monthly = %s
+            SET total = %s, daily = %s, monthly = %s, last_daily_reset = %s, last_monthly_reset = %s
             WHERE id = 1
             """,
-            (data["total"], json.dumps(data["daily"]), json.dumps(data["monthly"])),
+            (data["total"], data["daily"], data["monthly"], data["last_daily_reset"], data["last_monthly_reset"]),
         )
     conn.commit()
     conn.close()
@@ -40,21 +42,23 @@ def save_hits(data):
 def update_hit_counts():
     hits = load_hits()
     now = datetime.utcnow()
-    today = now.strftime("%Y-%m-%d")
-    month = now.strftime("%Y-%m")
+    today = now.date()
+    first_of_month = today.replace(day=1)
+
+    # Reset daily hits if the last reset was not today
+    if hits["last_daily_reset"] != today:
+        hits["daily"] = 0
+        hits["last_daily_reset"] = today
+
+    # Reset monthly hits if the last reset was not this month
+    if hits["last_monthly_reset"] != first_of_month:
+        hits["monthly"] = 0
+        hits["last_monthly_reset"] = first_of_month
 
     # Update counters
     hits["total"] += 1
-    hits["daily"][today] = hits["daily"].get(today, 0) + 1
-    hits["monthly"][month] = hits["monthly"].get(month, 0) + 1
-
-    # Keep only the last 30 days in 'daily'
-    recent_days = [(now - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(30)]
-    hits["daily"] = {k: v for k, v in hits["daily"].items() if k in recent_days}
-
-    # Keep only the last 12 months in 'monthly'
-    recent_months = [(now - relativedelta(months=i)).strftime("%Y-%m") for i in range(12)]
-    hits["monthly"] = {k: v for k, v in hits["monthly"].items() if k in recent_months}
+    hits["daily"] += 1
+    hits["monthly"] += 1
 
     save_hits(hits)
     return hits

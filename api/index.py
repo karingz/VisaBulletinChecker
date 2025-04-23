@@ -103,7 +103,7 @@ def save_subscriptions(data):
 
 def get_subscriber_count():
     subs = load_subscriptions()
-    return len(subs["emails"])
+    return len(subs)  # Count the number of subscribers
 
 import smtplib
 from email.mime.text import MIMEText

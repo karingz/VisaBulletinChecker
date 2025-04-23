@@ -78,15 +78,10 @@ def get_db_connection():
 def load_subscriptions():
     conn = get_db_connection()
     with conn.cursor() as cur:
-        cur.execute("SELECT email FROM subscriptions")
-        emails = [row[0] for row in cur.fetchall()]
-
-        cur.execute("SELECT last_sent_month FROM subscriptions LIMIT 1")
-        last_sent_month = cur.fetchone()
-        last_sent_month = last_sent_month[0] if last_sent_month else ""
-
+        cur.execute("SELECT email, last_sent_month FROM subscriptions")
+        subscriptions = [{"email": row[0], "last_sent_month": row[1]} for row in cur.fetchall()]
     conn.close()
-    return {"emails": emails, "last_sent_month": last_sent_month}
+    return subscriptions
 
 def save_subscriptions(data):
     conn = get_db_connection()
@@ -181,11 +176,12 @@ def check_bulletin():
 
     # Fetch all subscribers
     subscriptions = load_subscriptions()
-    emails = subscriptions["emails"]
-    last_sent_month = subscriptions["last_sent_month"]
 
     # Check and send emails to subscribers if needed
-    for email in emails:
+    for subscription in subscriptions:
+        email = subscription["email"]
+        last_sent_month = subscription["last_sent_month"]
+
         if last_sent_month != bulletin_month:
             subject = f"Visa Bulletin for {bulletin_month}"
             body = result.split("Last updated time:")[0]  # Remove the last updated time
@@ -193,8 +189,6 @@ def check_bulletin():
 
             # Update last_sent_month for the subscriber
             save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
-
-
 
     email_form = """
         <form method="post">

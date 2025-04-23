@@ -151,21 +151,14 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
                 return f"<p>❌ Unsubscribed: {email}</p>"
         return f"<p>ℹ️ Email not found: {email}</p>"
 
-    # Check if the email is already subscribed
-    if not any(subscription["email"] == email for subscription in subs):
-        save_subscriptions({"emails": [email], "last_sent_month": None})
+    # Always send the email upon resubscription
+    subject = f"Visa Bulletin for {bulletin_month}"
+    body = result.split("Last updated time:")[0]  # Remove the last updated time
+    send_email(email, subject, body, bulletin_month)
 
-    # Check if the email needs to receive the bulletin
-    for subscription in subs:
-        if subscription["email"] == email and subscription["last_sent_month"] != bulletin_month:
-            subject = f"Visa Bulletin for {bulletin_month}"
-            body = result.split("Last updated time:")[0]  # Remove the last updated time
-            send_email(email, subject, body, bulletin_month)
-
-            save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
-            return f"<p>✅ Subscribed and email sent to: {email}</p>"
-
-    return f"<p>✅ Subscribed. Email already sent for {bulletin_month}.</p>"
+    # Update the subscription in the database
+    save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
+    return f"<p>✅ Subscribed and email sent to: {email}</p>"
 
 @app.route("/unsubscribe", methods=["GET"])
 def unsubscribe():

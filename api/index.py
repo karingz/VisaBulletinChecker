@@ -31,10 +31,14 @@ def save_hits(data):
         cur.execute(
             """
             UPDATE hit_counts
-            SET total = %s, daily = %s, monthly = %s, last_daily_reset = %s, last_monthly_reset = %s
+            SET total = %s, 
+                daily = %s::jsonb, 
+                monthly = %s::jsonb, 
+                last_daily_reset = %s, 
+                last_monthly_reset = %s
             WHERE id = 1
             """,
-            (data["total"], data["daily"], data["monthly"], data["last_daily_reset"], data["last_monthly_reset"]),
+            (data["total"], json.dumps(data["daily"]), json.dumps(data["monthly"]), data["last_daily_reset"], data["last_monthly_reset"]),
         )
     conn.commit()
     conn.close()

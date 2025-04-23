@@ -87,17 +87,16 @@ def save_subscriptions(data):
     conn = get_db_connection()
     with conn.cursor() as cur:
         for email in data["emails"]:
+            # Insert or update the subscription with the correct last_sent_month
             cur.execute(
-                "INSERT INTO subscriptions (email) VALUES (%s) ON CONFLICT (email) DO NOTHING",
-                (email,),
+                """
+                INSERT INTO subscriptions (email, last_sent_month)
+                VALUES (%s, %s)
+                ON CONFLICT (email)
+                DO UPDATE SET last_sent_month = EXCLUDED.last_sent_month
+                """,
+                (email, data["last_sent_month"]),
             )
-
-        if data["last_sent_month"]:
-            cur.execute(
-                "UPDATE subscriptions SET last_sent_month = %s WHERE email = %s",
-                (data["last_sent_month"], data["emails"][0]),  # Update for the first email
-            )
-
     conn.commit()
     conn.close()
 
@@ -119,8 +118,7 @@ def send_email(to_email, subject, body, bulletin_month):
         # Append the link and unsubscribe note to the email body
         body += f"""
                 <br><br>
-                <p>🚀 <a href="https://visa-bulletin-checker.vercel.app/" target="_blank">Visit Visa Bulletin Checker Page</a></p>
-                <p>🔕 <a href="https://visa-bulletin-checker.vercel.app/unsubscribe?email={to_email}" target="_blank">Unsubscribe here</a></p>
+                <p>🚀 <a href="https://visa-bulletin-checker.vercel.app/" target="_blank">Visit Visa Bulletin Checker Page</a> ⬅ 🔕 Unsubscribe here</p>
                 """
 
         msg = MIMEMultipart()

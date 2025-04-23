@@ -142,30 +142,32 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
     subs = load_subscriptions()
 
     if unsubscribe:
-        if email in subs["emails"]:
-            subs["emails"].remove(email)
-            save_subscriptions(subs)
-            return f"<p>❌ Unsubscribed: {email}</p>"
-        else:
-            return f"<p>ℹ️ Email not found: {email}</p>"
+        # Check if the email exists in the subscriptions
+        for subscription in subs:
+            if subscription["email"] == email:
+                conn = get_db_connection()
+                with conn.cursor() as cur:
+                    cur.execute("DELETE FROM subscriptions WHERE email = %s", (email,))
+                conn.commit()
+                conn.close()
+                return f"<p>❌ Unsubscribed: {email}</p>"
+        return f"<p>ℹ️ Email not found: {email}</p>"
 
-    if email not in subs["emails"]:
-        subs["emails"].append(email)
+    # Check if the email is already subscribed
+    if not any(subscription["email"] == email for subscription in subs):
+        save_subscriptions({"emails": [email], "last_sent_month": None})
 
-    if subs["last_sent_month"] != bulletin_month:
-        # Send real email
-        subject = f"Visa Bulletin for {bulletin_month}"
-        result = result.split("Last updated time:")[0]  # Remove the last updated time
-        body = f"{result}"
-        send_email(email, subject, body, bulletin_month)
+    # Check if the email needs to receive the bulletin
+    for subscription in subs:
+        if subscription["email"] == email and subscription["last_sent_month"] != bulletin_month:
+            subject = f"Visa Bulletin for {bulletin_month}"
+            body = result.split("Last updated time:")[0]  # Remove the last updated time
+            send_email(email, subject, body, bulletin_month)
 
-        subs["last_sent_month"] = bulletin_month
-        save_subscriptions(subs)
-        return f"<p>✅ Subscribed and email sent to: {email}</p>"
-    else:
-        save_subscriptions(subs)
-        return f"<p>✅ Subscribed. Email already sent for {bulletin_month}.</p>"
+            save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
+            return f"<p>✅ Subscribed and email sent to: {email}</p>"
 
+    return f"<p>✅ Subscribed. Email already sent for {bulletin_month}.</p>"
 
 @app.route("/unsubscribe", methods=["GET"])
 def unsubscribe():

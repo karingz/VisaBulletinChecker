@@ -133,9 +133,6 @@ def send_email(to_email, subject, body, bulletin_month):
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
         print(f"📧 Email sent to {to_email}")
-
-        # Update LAST_SENT_MONTH environment variable
-        os.environ["LAST_SENT_MONTH"] = bulletin_month
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 
@@ -174,6 +171,24 @@ def check_bulletin():
     subscriber_count = get_subscriber_count()
 
     result, bulletin_month = VisaBulletinChecker.run_check(return_month=True)
+
+
+    # Fetch all subscribers
+    subscriptions = load_subscriptions()
+    emails = subscriptions["emails"]
+    last_sent_month = subscriptions["last_sent_month"]
+
+    # Check and send emails to subscribers if needed
+    for email in emails:
+        if last_sent_month != bulletin_month:
+            subject = f"Visa Bulletin for {bulletin_month}"
+            body = result.split("Last updated time:")[0]  # Remove the last updated time
+            send_email(email, subject, body, bulletin_month)
+
+            # Update last_sent_month for the subscriber
+            save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
+
+
 
     email_form = """
         <form method="post">

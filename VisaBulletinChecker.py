@@ -78,7 +78,7 @@ def run_check(return_month=False):
             message_month = bulletin_month
             msg = f"""
             <h2>📢 [Visa Bulletin] {message_month}-{bulletin_year} Released!</h2>
-            <p>🔗 <a href="{matched_link}" target="_blank">{matched_link}</a></p>
+            <p> 🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
             {table_html}
             """
@@ -86,7 +86,7 @@ def run_check(return_month=False):
             msg = f"""
             <h2>📢 [Visa Bulletin] {(now + relativedelta(months=1)).strftime('%B')}-{now.year} hasn't been released yet!</h2>
             <p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p>
-            <p>🔗 <a href="{matched_link}" target="_blank">{matched_link}</a></p>
+            <p>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
             {table_html}
             """

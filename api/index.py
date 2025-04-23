@@ -121,6 +121,13 @@ SMTP_PASS = os.getenv("SMTP_PASS")  # Set your email password in environment var
 
 def send_email(to_email, subject, body, bulletin_month):
     try:
+        # Append the link and unsubscribe note to the email body
+        body += f"""
+                <br><br>
+                <p>🚀 <a href="https://visa-bulletin-checker.vercel.app/" target="_blank">Visit Visa Bulletin Checker Page</a></p>
+                <p>🔕 <a href="https://visa-bulletin-checker.vercel.app/unsubscribe?email={to_email}" target="_blank">Unsubscribe here</a></p>
+                """
+
         msg = MIMEMultipart()
         msg["From"] = SMTP_USER
         msg["To"] = to_email
@@ -171,7 +178,6 @@ def check_bulletin():
     subscriber_count = get_subscriber_count()
 
     result, bulletin_month = VisaBulletinChecker.run_check(return_month=True)
-
 
     # Fetch all subscribers
     subscriptions = load_subscriptions()

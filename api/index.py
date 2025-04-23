@@ -160,6 +160,12 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
     save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
     return f"<p>✅ Subscribed and email sent to: {email}</p>"
 
+def is_valid_email(email):
+    import re
+    email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return re.match(email_regex, email) is not None
+
+
 @app.route("/unsubscribe", methods=["GET"])
 def unsubscribe():
     email = request.args.get("email")
@@ -223,7 +229,10 @@ def check_bulletin():
         email = request.form.get("email")
         unsubscribe = request.form.get("unsubscribe") == "on"
         if email:
-            subs_msg = handle_subscription(email, result, bulletin_month, unsubscribe=unsubscribe)
+            if is_valid_email(email):
+                subs_msg = handle_subscription(email, result, bulletin_month, unsubscribe=unsubscribe)
+            else:
+                subs_msg = "<p>❌ Invalid email address provided.</p>"
 
     hit_info = f"""
     <p>📊 Page Hits:</p>

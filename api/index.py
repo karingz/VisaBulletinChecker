@@ -207,13 +207,13 @@ def check_bulletin():
             <label style="margin-left: 10px;">
                 <input type="checkbox" name="unsubscribe" id="unsubscribe-checkbox" onchange="updateButtonText()" style="color: red;"> Unsubscribe
             </label>
-            <button type="submit" id="submit-button">🔔 Submit</button>
+            <button type="submit" id="submit-button">🔔 <strong>Submit</strong></button>
         </form><br/>
         <script>
             function updateButtonText() {
                 const checkbox = document.getElementById('unsubscribe-checkbox');
                 const button = document.getElementById('submit-button');
-                button.innerHTML = checkbox.checked ? '🔕 <b>Submit</b>' : '🔔 <b>Submit</b>';
+                    button.innerHTML = checkbox.checked ? '🔕 <strong>Submit</strong>' : '🔔 <strong>Submit</strong>';
             }
         </script>
     """
@@ -229,9 +229,10 @@ def check_bulletin():
     <p>📊 Page Hits:</p>
     <table>
         <tr>
-            <td>Total: {hits['total']}</td>
-            <td>Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']}</td>
+            <td style="padding-right: 20px;">Total: {hits['total']}</td>
+            <td style="padding-right: 20px;">Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']}</td>
             <td>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily']}</td>
+        </tr>
         </tr>
     </table>
     <p>👥 Subscriber Count: {subscriber_count}</p>

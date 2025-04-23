@@ -8,13 +8,34 @@ from dateutil.relativedelta import relativedelta
 app = Flask(__name__)
 
 def load_hits():
-    # Load hit counts from environment variables
-    hits_json = os.getenv("HIT_COUNT", '{"total": 0, "monthly": {}, "daily": {}}')
-    return json.loads(hits_json)
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute("SELECT total, daily, monthly FROM hit_counts LIMIT 1")
+        row = cur.fetchone()
+        if row:
+            hits = {
+                "total": row[0],
+                "daily": json.loads(row[1]),
+                "monthly": json.loads(row[2]),
+            }
+        else:
+            hits = {"total": 0, "daily": {}, "monthly": {}}
+    conn.close()
+    return hits
 
 def save_hits(data):
-    # Save hit counts back to environment variables
-    os.environ["HIT_COUNT"] = json.dumps(data)
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE hit_counts
+            SET total = %s, daily = %s, monthly = %s
+            WHERE id = 1
+            """,
+            (data["total"], json.dumps(data["daily"]), json.dumps(data["monthly"])),
+        )
+    conn.commit()
+    conn.close()
 
 def update_hit_counts():
     hits = load_hits()

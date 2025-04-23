@@ -205,10 +205,17 @@ def check_bulletin():
         <form method="post">
             <input type="email" name="email" placeholder="Enter email" required>
             <label style="margin-left: 10px;">
-                <input type="checkbox" name="unsubscribe"> Unsubscribe
+                <input type="checkbox" name="unsubscribe" id="unsubscribe-checkbox" onchange="updateButtonText()" style="color: red;"> Unsubscribe
             </label>
-            <button type="submit">Submit</button>
+            <button type="submit" id="submit-button">🔔 Submit</button>
         </form><br/>
+        <script>
+            function updateButtonText() {
+                const checkbox = document.getElementById('unsubscribe-checkbox');
+                const button = document.getElementById('submit-button');
+                button.innerHTML = checkbox.checked ? '🔕 <b>Submit</b>' : '🔔 <b>Submit</b>';
+            }
+        </script>
     """
 
     subs_msg = ""
@@ -220,11 +227,13 @@ def check_bulletin():
 
     hit_info = f"""
     <p>📊 Page Hits:</p>
-    <ul>
-        <li>Total: {hits['total']}</li>
-        <li>Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']}</li>
-        <li>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily']}</li>
-    </ul>
+    <table>
+        <tr>
+            <td>Total: {hits['total']}</td>
+            <td>Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']}</td>
+            <td>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily']}</td>
+        </tr>
+    </table>
     <p>👥 Subscriber Count: {subscriber_count}</p>
     """
 

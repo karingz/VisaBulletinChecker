@@ -104,7 +104,7 @@ def run_check(return_month=False):
 
         msg += """
         <table>
-            <tr><td colspan="2">Last updated time:</td></tr>
+            <tr><td colspan="2">⌛ Last updated time:</td></tr>
             <tr><td>KST (Seoul)</td><td>{kst_time}</td></tr>
             <tr><td>PST (LA)</td><td>{pst_time}</td></tr>
             <tr><td>CST (Chicago)</td><td>{cst_time}</td></tr>

@@ -236,15 +236,14 @@ def check_bulletin():
 
     hit_info = f"""
     <p>📊 Page Hits:</p>
-    <table>
+    <table style="font-size: 0.9em;">
         <tr>
             <td style="padding-right: 20px;">Total: {hits['total']}</td>
             <td style="padding-right: 20px;">Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']}</td>
             <td>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily']}</td>
         </tr>
-        </tr>
     </table>
-    <p>👥 Subscriber Count: {subscriber_count}</p>
+    <p style="font-size: 0.9em;">👥 Subscriber Count: {subscriber_count}</p>
     """
 
     return ("""
@@ -265,7 +264,8 @@ def check_bulletin():
             </style>
         </head>
         <body>
-            {hit_info}<hr><pre>{result}</pre>
+            {hit_info}
+            <hr><pre>{result}</pre>
             {email_form}
             {subs_msg}<br>
             <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>

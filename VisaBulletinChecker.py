@@ -78,17 +78,16 @@ def run_check(return_month=False):
         # Step 5: Format message and return it
         bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
 
-        if datetime.strptime(bulletin_month, "%B").month == (now + relativedelta(months=1)).month:
-            message_month = bulletin_month
+        if bulletin_month.lower() == now.strftime("%B").lower() and bulletin_year == str(now.year):
             msg = f"""
-            <h2>📢 [Visa Bulletin] {message_month}-{bulletin_year} Released!</h2>
+            <h2>📢 [Visa Bulletin] {bulletin_month}-{bulletin_year} Released!</h2>
             <p> 🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
             {table_html}
             """
         else:
             msg = f"""
-            <h2>📢 [Visa Bulletin] {(now + relativedelta(months=1)).strftime('%B')}-{now.year} hasn't been released yet!</h2>
+            <h2>📢 [Visa Bulletin] {now.strftime('%B')}-{now.year} hasn't been released yet!</h2>
             <p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p>
             <p>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>

@@ -87,7 +87,7 @@ def run_check(return_month=False):
         if bulletin_month.lower() == now.strftime("%B").lower() and bulletin_year == str(now.year):
             msg = f"""
             <h2>📢 [Visa Bulletin] {bulletin_month}-{bulletin_year} Released!</h2>
-            <p> 🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
+            <span>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></span>
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
             {table_html}"""
         else:

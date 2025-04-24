@@ -247,11 +247,20 @@ def check_bulletin():
     <p>👥 Subscriber Count: {subscriber_count}</p>
     """
 
-    return (f"{hit_info}<hr><pre>{result}</pre>"
-            f"{email_form}"
-            f"{subs_msg}<br>"
-            f"<p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>"
-            f"<p>📧 <a href='mailto:imaginaryground@gmail.com'>Shoot me an email</a></p>")
+    return ("""
+        <html>
+        <head>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+        </head>
+        <body>
+            {hit_info}<hr><pre>{result}</pre>
+            {email_form}
+            {subs_msg}<br>
+            <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>
+            <p>📧 <a href='mailto:imaginaryground@gmail.com'>Shoot me an email</a></p>
+        </body>
+        </html>
+    """.format(hit_info=hit_info, result=result, email_form=email_form, subs_msg=subs_msg))
 
 if __name__ == "__main__":
     app.run()

@@ -213,7 +213,7 @@ def check_bulletin():
             <label style="margin-left: 10px;">
                 <input type="checkbox" name="unsubscribe" id="unsubscribe-checkbox" onchange="updateButtonText()" style="color: red;"> Unsubscribe
             </label>
-            <button type="submit" id="submit-button">🔔 <strong>Submit</strong></button>
+            <button type="submit" id="submit-button" style="margin-left: 10px;">🔔 <strong>Submit</strong></button>
         </form><br/>
         <script>
             function updateButtonText() {
@@ -267,8 +267,9 @@ def check_bulletin():
             {hit_info}
             <hr>
             {result}
+            <hr>
             {email_form}
-            {subs_msg}<br>
+            {subs_msg}
             <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>
             <p>📧 <a href='mailto:imaginaryground@gmail.com'>Shoot me an email</a></p>
         </body>

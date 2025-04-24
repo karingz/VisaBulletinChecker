@@ -25,27 +25,31 @@ def run_check(return_month=False):
             now = datetime.now()
         slugs_to_try = [get_month_slug(now + relativedelta(months=1)), get_month_slug(now)]
 
-        # Step 2: Fetch bulletin links from index page
+        # Step 2: Check the "Current Visa Bulletin" section on the index page
         resp = requests.get(INDEX_URL)
         soup = BeautifulSoup(resp.content, "html.parser")
-        links = soup.select("a[href*='visa-bulletin-for']")
+        current_bulletin_section = soup.find("li", class_="current")
 
-        matched_slug = None
-        matched_link = None
-        for slug in slugs_to_try:
-            for a in links:
-                href = a.get("href", "")
-                if slug in href:
-                    matched_link = BASE_URL + href if href.startswith("/") else href
-                    matched_slug = slug
-                    break
-            if matched_link:
-                break
+        if not current_bulletin_section:
+            return "<p>❌ Could not find the 'Current Visa Bulletin' section.</p>"
 
-        if not matched_link:
-            return "<p>🔁 No bulletin found for this or last month.</p>"
+        current_bulletin_link = current_bulletin_section.find("a", class_="btn btn-lg btn-success")
+        if not current_bulletin_link:
+            return "<p>❌ Could not find the link to the current visa bulletin.</p>"
 
-        # Step 4: Scrape the bulletin page and find the target table
+        href = current_bulletin_link.get("href", "")
+        if not href:
+            return "<p>❌ The current visa bulletin link is empty.</p>"
+
+        matched_link = BASE_URL + href if href.startswith("/") else href
+        matched_slug = href.split("/")[-1]
+
+        # Check if the current bulletin matches the current month
+        bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
+        if bulletin_month.lower() != now.strftime("%B").lower() or bulletin_year != str(now.year):
+            return f"<p>🔁 The bulletin for {now.strftime('%B')} {now.year} hasn't been released yet.</p>"
+
+        # Step 3: Scrape the bulletin page and find the target table
         resp = requests.get(matched_link)
         soup = BeautifulSoup(resp.content, "html.parser")
 
@@ -60,7 +64,7 @@ def run_check(return_month=False):
         if not target_table:
             return "<p>❌ Could not find the target table.</p>"
 
-        # Step 5: Extract the table into clean HTML format
+        # Step 4: Extract the table into clean HTML format
         table_html = '<table width="100%" border="1" cellspacing="0" cellpadding="3">'
         for row_index, row in enumerate(target_table.select("tr"), start=1):
             table_html += "<tr>"
@@ -71,7 +75,7 @@ def run_check(return_month=False):
             table_html += "</tr>"
         table_html += "</table>"
 
-        # Step 6: Format message and return it
+        # Step 5: Format message and return it
         bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
 
         if datetime.strptime(bulletin_month, "%B").month == (now + relativedelta(months=1)).month:
@@ -91,9 +95,7 @@ def run_check(return_month=False):
             {table_html}
             """
 
-        last_updated = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-
-        # Get current time in KST, Texas, and California
+        # Step 6: Get current time to show last updated time
         from datetime import timezone as tz
         from zoneinfo import ZoneInfo
 

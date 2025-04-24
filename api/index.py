@@ -252,16 +252,16 @@ def check_bulletin():
         <head>
             <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
             <style>
-                body {
+                body {{
                     font-family: Arial, sans-serif; /* Unified font for the page */
-                }
-                a {
+                }}
+                a {{
                     color: grey; /* Set link font color to grey */
                     text-decoration: none; /* Remove underline from links */
-                }
-                a:hover {
+                }}
+                a:hover {{
                     text-decoration: underline; /* Add underline on hover for better UX */
-                }
+                }}
             </style>
         </head>
         <body>

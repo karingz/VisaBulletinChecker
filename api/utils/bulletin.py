@@ -54,11 +54,11 @@ def extract_target_table(soup):
 def format_table_html(table):
     table_html = '<table width="100%" border="1" cellspacing="0" cellpadding="3">'
     for row_index, row in enumerate(table.select("tr"), start=1):
-        table_html += "<tr>"
+        style = ' style="background-color: yellow;"' if row_index == 3 else ""
+        table_html += f"<tr{style}>"
         for col_index, col in enumerate(row.find_all(["th", "td"]), start=1):
             tag = "th" if col.name == "th" else "td"
-            style = ' style="background-color: yellow; font-weight: bold;"' if row_index == 3 else ""
-            table_html += f"<{tag}{style}>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
+            table_html += f"<{tag}>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
         table_html += "</tr>"
     table_html += "</table>"
     return table_html

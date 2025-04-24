@@ -52,7 +52,7 @@ def run_check(return_month=False):
         bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
         if bulletin_month.lower() != now.strftime("%B").lower() or bulletin_year != str(now.year):
             # Proceed with the previous month's bulletin
-            matched_slug = slugs_to_try[1].split("/")[-1]
+            matched_slug = slugs_to_try[1].split("/")[-1]   # changing the slug to the previous month
             bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
 
         # Step 3: Scrape the bulletin page and find the target table

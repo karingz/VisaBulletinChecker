@@ -153,7 +153,7 @@ def handle_subscription(email, result, bulletin_month, unsubscribe=False):
 
     # Always send the email upon resubscription
     subject = f"Visa Bulletin for {bulletin_month}"
-    body = result.split("Last updated time:")[0]  # Remove the last updated time
+    body = result.split("⌛ Last updated time:")[0]  # Remove the last updated time
     send_email(email, subject, body, bulletin_month)
 
     # Update the subscription in the database

@@ -201,7 +201,7 @@ def check_bulletin():
 
         if last_sent_month != bulletin_month:
             subject = f"Visa Bulletin for {bulletin_month}"
-            body = result.split("Last updated time:")[0]  # Remove the last updated time
+            body = result.split("⌛ Last updated time:")[0]  # Remove the last updated time
             send_email(email, subject, body, bulletin_month)
 
             # Update last_sent_month for the subscriber

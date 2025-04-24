@@ -4,7 +4,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto Condensed', Arial, sans-serif;
         }
         a {
             color: grey;
@@ -12,6 +12,39 @@
         }
         a:hover {
             text-decoration: underline;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 1px;
+            border: 1px solid #e6e6e6;
+            border-radius: 16px;
+            overflow: hidden;
+            font-family: 'robotocondensed-regular-webfont', Arial, sans-serif;
+            font-size: 14px;
+            color: #444444;
+        }
+        .result-table th, .result-table td {
+            padding: 12px 16px;
+            border: 1px solid #e6e6e6;
+            text-align: left;
+        }
+        .result-table th {
+            background-color: #f2f2f2;
+            font-weight: 500;
+        }
+        .result-table tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        .result-table tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+        .result-table tr:first-child th,
+        .result-table tr:first-child td {
+            background-color: #06284c;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
         }
     </style>
 </head>

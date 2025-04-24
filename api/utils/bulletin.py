@@ -52,7 +52,7 @@ def extract_target_table(soup):
 
 # Formatting Functions
 def format_table_html(table):
-    table_html = '<table width="100%" border="1" cellspacing="0" cellpadding="3">'
+    table_html = '<table class="result-table" width="100%" border="1" cellspacing="0" cellpadding="3">'
     for row_index, row in enumerate(table.select("tr"), start=1):
         style = ' style="background-color: yellow;"' if row_index == 3 else ""
         table_html += f"<tr{style}>"

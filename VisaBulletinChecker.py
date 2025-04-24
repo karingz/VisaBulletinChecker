@@ -31,15 +31,15 @@ def run_check(return_month=False):
         current_bulletin_section = soup.find("li", class_="current")
 
         if not current_bulletin_section:
-            return "<p>❌ Could not find the 'Current Visa Bulletin' section.</p>"
+            return "<p>❌ Could not find the 'Current Visa Bulletin' section.</p>", ""
 
         current_bulletin_link = current_bulletin_section.find("a", class_="btn btn-lg btn-success")
         if not current_bulletin_link:
-            return "<p>❌ Could not find the link to the current visa bulletin.</p>"
+            return "<p>❌ Could not find the link to the current visa bulletin.</p>", ""
 
         href = current_bulletin_link.get("href", "")
         if not href:
-            return "<p>❌ The current visa bulletin link is empty.</p>"
+            return "<p>❌ The current visa bulletin link is empty.</p>", ""
 
         matched_link = BASE_URL + href if href.startswith("/") else href
         matched_slug = href.split("/")[-1]
@@ -47,7 +47,7 @@ def run_check(return_month=False):
         # Check if the current bulletin matches the current month
         bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
         if bulletin_month.lower() != now.strftime("%B").lower() or bulletin_year != str(now.year):
-            return f"<p>🔁 The bulletin for {now.strftime('%B')} {now.year} hasn't been released yet.</p>"
+            return f"<p>🔁 The bulletin for {now.strftime('%B')} {now.year} hasn't been released yet.</p>", f"{bulletin_year}-{bulletin_month}"
 
         # Step 3: Scrape the bulletin page and find the target table
         resp = requests.get(matched_link)

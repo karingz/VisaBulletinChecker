@@ -1,5 +1,4 @@
 from flask import Flask, request, render_template
-import VisaBulletinChecker
 from datetime import datetime
 from api.utils.hits import update_hit_counts
 from api.utils.subscription import load_subscriptions, save_subscriptions, handle_subscription, get_subscriber_count
@@ -12,7 +11,7 @@ def check_bulletin():
     hits = update_hit_counts()
     subscriber_count = get_subscriber_count()
 
-    result, bulletin_month = VisaBulletinChecker.run_check(return_month=True)
+    result, bulletin_month = run_check(return_month=True)
 
     subscriptions = load_subscriptions()
     for subscription in subscriptions:

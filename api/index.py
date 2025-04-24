@@ -235,15 +235,15 @@ def check_bulletin():
                 subs_msg = "<p>❌ Invalid email address provided.</p>"
 
     hit_info = f"""
-    <p>📊 Page Hits:</p>
-    <table style="font-size: 0.9em;">
+    <p style="font-size: 0.6em;">📊 Page Hits:</p>
+    <table style="font-size: 0.5em; margin: 5px 0;">
         <tr>
-            <td style="padding-right: 20px;">Total: {hits['total']}</td>
-            <td style="padding-right: 20px;">Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']}</td>
-            <td>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily']}</td>
+            <td style="padding-right: 20px;">Total: {hits['total']:,}</td>
+            <td style="padding-right: 20px;">Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']:,}</td>
+            <td>Daily ({datetime.utcnow().strftime('%Y-%m-%d')}): {hits['daily']:,}</td>
         </tr>
     </table>
-    <p style="font-size: 0.9em;">👥 Subscriber Count: {subscriber_count}</p>
+    <p style="font-size: 0.9em;">👥 Subscriber Count: {subscriber_count:,}</p>
     """
 
     return ("""
@@ -265,11 +265,11 @@ def check_bulletin():
         </head>
         <body>
             {hit_info}
-            <hr><pre>{result}</pre>
+            <hr style="margin: 5px 0;"><pre style="margin: 5px 0;">{result}</pre>
             {email_form}
             {subs_msg}<br>
-            <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>
-            <p>📧 <a href='mailto:imaginaryground@gmail.com'>Shoot me an email</a></p>
+            <p style="margin: 5px 0;"><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>
+            <p style="margin: 5px 0;">📧 <a href='mailto:imaginaryground@gmail.com'>Shoot me an email</a></p>
         </body>
         </html>
     """.format(hit_info=hit_info, result=result, email_form=email_form, subs_msg=subs_msg))

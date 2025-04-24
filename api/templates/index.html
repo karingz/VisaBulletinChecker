@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        a {
+            color: grey;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <p style="font-size: 0.7em;">📊 Page Hits:</p>
+        <table style="font-size: 0.7em; margin: 5px 0;">
+            <tr>
+                <td style="padding-right: 20px;">Total: {{ hits.total|int|comma }}</td>
+                <td style="padding-right: 20px;">Monthly ({{ current_month }}): {{ hits.monthly|int|comma }}</td>
+                <td>Daily ({{ current_date }}): {{ hits.daily|int|comma }}</td>
+            </tr>
+        </table>
+        <p style="font-size: 0.9em;">👥 Subscriber Count: {{ subscriber_count|int|comma }}</p>
+    </div>
+    <hr>
+    <div>
+        {{ result|safe }}
+    </div>
+    <hr>
+    <div>
+        <form method="post">
+            <input type="email" name="email" placeholder="Enter email" required>
+            <label style="margin-left: 10px;">
+                <input type="checkbox" name="unsubscribe" id="unsubscribe-checkbox" onchange="updateButtonText()" style="color: red;"> Unsubscribe
+            </label>
+            <button type="submit" id="submit-button" style="margin-left: 10px;">🔔 <strong>Submit</strong></button>
+        </form><br/>
+        <script>
+            function updateButtonText() {
+                const checkbox = document.getElementById('unsubscribe-checkbox');
+                const button = document.getElementById('submit-button');
+                button.innerHTML = checkbox.checked ? '🔕 <strong>Submit</strong>' : '🔔 <strong>Submit</strong>';
+            }
+        </script>
+    </div>
+    <div>
+        {{ subs_msg|safe }}
+    </div>
+    <br><br>
+    <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit GitHub Page</a></p>
+    <p>📧 <a href='mailto:imaginaryground@gmail.com'>email me</a></p>
+</body>
+</html>

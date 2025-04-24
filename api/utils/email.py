@@ -33,5 +33,7 @@ def send_email(to_email, subject, body, bulletin_month):
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
         print(f"📧 Email sent to {to_email}")
+        return True  # Email sent successfully
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
+        return False  # Email failed to send

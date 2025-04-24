@@ -23,8 +23,12 @@ def check_bulletin():
         if last_sent_month != bulletin_month:
             subject = f"Visa Bulletin for {bulletin_month}"
             body = result.split("⌛ Last updated time:")[0]
-            send_email(email, subject, body, bulletin_month)
-            save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
+            if not send_email(email, subject, body, bulletin_month):
+                # Remove the email from the database if sending fails
+                save_subscriptions({"emails": [email], "unsubscribe": True})
+                print(f"❌ Failed to send email to {email}. Unsubscribing.")
+            else:
+                save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
 
     subs_msg = ""
     if request.method == "POST":

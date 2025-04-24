@@ -270,8 +270,8 @@ def check_bulletin():
             <hr>
             {email_form}
             {subs_msg}
-            <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>
-            <p>📧 <a href='mailto:imaginaryground@gmail.com'>Shoot me an email</a></p>
+            <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit GitHub Page</a></p>
+            <p>📧 <a href='mailto:imaginaryground@gmail.com'>Email me</a></p>
         </body>
         </html>
     """.format(hit_info=hit_info, result=result, email_form=email_form, subs_msg=subs_msg))

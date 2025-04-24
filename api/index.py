@@ -1,5 +1,7 @@
 from flask import Flask, request, render_template
 from datetime import datetime
+
+from api.utils.bulletin import run_check
 from api.utils.hits import update_hit_counts
 from api.utils.subscription import load_subscriptions, save_subscriptions, handle_subscription, get_subscriber_count
 from api.utils.email import is_valid_email, send_email
@@ -43,6 +45,14 @@ def check_bulletin():
         result=result,
         subs_msg=subs_msg,
     )
+
+@app.template_filter('comma')
+def format_with_commas(value):
+    try:
+        return f"{int(value):,}"
+    except (ValueError, TypeError):
+        return value
+
 
 if __name__ == "__main__":
     app.run()

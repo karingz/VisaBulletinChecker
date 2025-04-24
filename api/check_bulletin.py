@@ -1,4 +1,4 @@
-from VisaBulletinChecker import run_check
+from api.utils.bulletin import run_check
 
 
 def handler(request):

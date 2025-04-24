@@ -235,8 +235,8 @@ def check_bulletin():
                 subs_msg = "<p>❌ Invalid email address provided.</p>"
 
     hit_info = f"""
-    <p style="font-size: 0.6em;">📊 Page Hits:</p>
-    <table style="font-size: 0.5em; margin: 5px 0;">
+    <p style="font-size: 0.7em; display: inline-block;">📊 Page Hits:</p>
+    <table style="font-size: 0.7em; margin: 5px 0; display: inline-block; margin-left: 10px;">
         <tr>
             <td style="padding-right: 20px;">Total: {hits['total']:,}</td>
             <td style="padding-right: 20px;">Monthly ({datetime.utcnow().strftime('%Y-%m')}): {hits['monthly']:,}</td>
@@ -265,7 +265,7 @@ def check_bulletin():
         </head>
         <body>
             {hit_info}
-            <hr style="margin: 5px 0;"><pre style="margin: 5px 0;">{result}</pre>
+            <hr>{result}</pre>
             {email_form}
             {subs_msg}<br>
             <p style="margin: 5px 0;"><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>

@@ -89,16 +89,14 @@ def run_check(return_month=False):
             <h2>📢 [Visa Bulletin] {bulletin_month}-{bulletin_year} Released!</h2>
             <p> 🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
-            {table_html}
-            """
+            {table_html}"""
         else:
             msg = f"""
             <h2>📢 [Visa Bulletin] {now.strftime('%B')}-{now.year} hasn't been released yet!</h2>
             <p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p>
             <p>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
             <h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
-            {table_html}
-            """
+            {table_html}"""
 
         # Step 6: Get current time to show last updated time
         from datetime import timezone as tz

@@ -266,7 +266,7 @@ def check_bulletin():
         <body>
             {hit_info}
             <hr>
-            <pre>{result}</pre>
+            result}
             {email_form}
             {subs_msg}<br>
             <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github'></i> Visit the GitHub Page</a></p>

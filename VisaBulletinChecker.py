@@ -86,17 +86,18 @@ def run_check(return_month=False):
 
         if bulletin_month.lower() == now.strftime("%B").lower() and bulletin_year == str(now.year):
             msg = f"""
-<h2>📢 [Visa Bulletin] {bulletin_month}-{bulletin_year} Released!</h2>
-<span>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></span>
-<h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
-{table_html}"""
+            <pre><h2>📢 [Visa Bulletin] {bulletin_month}-{bulletin_year} Released!</h2></pre>
+            <pre><span>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></span></pre>
+            <pre><h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3></pre>
+            <pre>{table_html}</pre>
+            """
         else:
             msg = f"""
-<h2>📢 [Visa Bulletin] {now.strftime('%B')}-{now.year} hasn't been released yet!</h2>
-<p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p>
-<p>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p>
-<h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3>
-{table_html}"""
+            <pre><h2>📢 [Visa Bulletin] {now.strftime('%B')}-{now.year} hasn't been released yet!</h2></pre>
+            <pre><p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p></pre>
+            <pre><p>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p></pre>
+            <pre><h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3></pre>
+            <pre>{table_html}</pre>"""
 
         # Step 6: Get current time to show last updated time
         from datetime import timezone as tz

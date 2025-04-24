@@ -109,13 +109,13 @@ def run_check(return_month=False):
         est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M")
 
         msg += """
-        <table>
+        <pre><table>
             <tr><td colspan="2">⌛ Last updated time:</td></tr>
             <tr><td>KST (Seoul)</td><td>{kst_time}</td></tr>
             <tr><td>PST (LA)</td><td>{pst_time}</td></tr>
             <tr><td>CST (Chicago)</td><td>{cst_time}</td></tr>
             <tr><td>EST (NY)</td><td>{est_time}</td></tr>
-        </table>
+        </table></pre>
         """.format(kst_time=kst_time, pst_time=pst_time, cst_time=cst_time, est_time=est_time)
 
         if return_month:

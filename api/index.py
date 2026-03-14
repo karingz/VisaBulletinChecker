@@ -11,7 +11,8 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def check_bulletin():
-    hits = update_hit_counts()
+    visitor_ip = request.headers.get("x-forwarded-for", request.remote_addr)
+    hits = update_hit_counts(ip=visitor_ip)
     subscriber_count = get_subscriber_count()
 
     # Use cached bulletin if available, otherwise scrape and cache

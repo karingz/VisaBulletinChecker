@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from api.utils.db import get_db_connection
 
 def load_hits():
@@ -26,10 +26,10 @@ def save_hits(data):
         cur.execute(
             """
             UPDATE hit_counts
-            SET total = %s, 
-                daily = %s::jsonb, 
-                monthly = %s::jsonb, 
-                last_daily_reset = %s, 
+            SET total = %s,
+                daily = %s::jsonb,
+                monthly = %s::jsonb,
+                last_daily_reset = %s,
                 last_monthly_reset = %s
             WHERE id = 1
             """,
@@ -38,7 +38,35 @@ def save_hits(data):
     conn.commit()
     conn.close()
 
-def update_hit_counts():
+def is_recent_visitor(ip):
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT 1 FROM recent_visitors WHERE ip = %s AND visited_at > NOW() - INTERVAL '1 hour' LIMIT 1",
+            (ip,),
+        )
+        found = cur.fetchone() is not None
+    conn.close()
+    return found
+
+def record_visitor(ip):
+    conn = get_db_connection()
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO recent_visitors (ip, visited_at)
+            VALUES (%s, NOW())
+            ON CONFLICT (ip)
+            DO UPDATE SET visited_at = NOW()
+            """,
+            (ip,),
+        )
+        # Clean up entries older than 1 hour
+        cur.execute("DELETE FROM recent_visitors WHERE visited_at < NOW() - INTERVAL '1 hour'")
+    conn.commit()
+    conn.close()
+
+def update_hit_counts(ip=None):
     hits = load_hits()
     now = datetime.utcnow()
     today = now.date()
@@ -54,11 +82,16 @@ def update_hit_counts():
         hits["monthly"] = 0
         hits["last_monthly_reset"] = first_of_month
 
-    # Update counters
+    # Only count if IP not seen in the last hour
+    if ip and is_recent_visitor(ip):
+        return hits
+
+    if ip:
+        record_visitor(ip)
+
     hits["total"] += 1
     hits["daily"] += 1
     hits["monthly"] += 1
 
     save_hits(hits)
     return hits
-

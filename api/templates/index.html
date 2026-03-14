@@ -3,121 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#06284c">
+    <meta name="theme-color" content="#ffffff">
     <title>Visa Bulletin Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f1f5f9;
-            color: #1e293b;
-            margin: 0;
-            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fb;
+            color: #0f172a;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
-        .header {
-            background: linear-gradient(135deg, #06284c 0%, #0e4a80 100%);
-            color: #ffffff;
-            padding: 32px 24px;
-            text-align: center;
+
+        /* ── Topbar ── */
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e8ecf1;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.85);
         }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
             letter-spacing: -0.02em;
         }
-        .header p {
-            margin: 8px 0 0;
-            font-size: 14px;
-            color: #94b8db;
+        .topbar-brand svg {
+            color: #465fff;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 24px 16px 48px;
-        }
-        .card {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-        .stats-row {
+        .topbar-links {
             display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .topbar-links a {
+            font-size: 13px;
+            color: #64748b;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .topbar-links a:hover { color: #0f172a; }
+        .topbar-links a:focus-visible {
+            outline: 2px solid #465fff;
+            outline-offset: 2px;
+            border-radius: 3px;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        /* ── Page Title ── */
+        .page-title {
+            margin-bottom: 28px;
+        }
+        .page-title h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+        }
+        .page-title p {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
         }
         .stat-card {
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            padding: 16px 20px;
-            flex: 1;
-            min-width: 140px;
-            text-align: center;
+            background: #fff;
+            border: 1px solid #e8ecf1;
+            border-radius: 14px;
+            padding: 20px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+        .stat-card:hover {
+            border-color: #c7d2fe;
+            box-shadow: 0 4px 16px rgba(70,95,255,0.06);
+        }
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+        .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
+        .stat-icon.purple { background: #f5f3ff; color: #8b5cf6; }
+        .stat-icon.emerald { background: #ecfdf5; color: #10b981; }
+        .stat-icon.amber { background: #fffbeb; color: #f59e0b; }
         .stat-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            margin: 0 0 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 4px;
         }
         .stat-value {
-            font-size: 22px;
+            font-size: 28px;
             font-weight: 700;
-            color: #06284c;
+            color: #0f172a;
+            letter-spacing: -0.02em;
             font-variant-numeric: tabular-nums;
-            margin: 0;
+            line-height: 1;
         }
         .stat-sub {
             font-size: 11px;
             color: #94a3b8;
-            margin: 2px 0 0;
+            margin-top: 4px;
         }
 
-        /* Override inline table styles for page display */
-        .bulletin-content table {
-            border-radius: 12px !important;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border: 1px solid #e8ecf1;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
         }
+
+        /* ── Bulletin Content (overrides inline email styles) ── */
         .bulletin-content h2 {
             font-size: 22px;
-            color: #06284c;
-            margin: 0 0 8px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
         }
         .bulletin-content h3 {
-            font-size: 15px;
-            color: #334155;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #64748b !important;
+            text-transform: uppercase;
+            letter-spacing: 0.06em !important;
+            margin: 28px 0 14px !important;
+        }
+        .bulletin-content > h3:first-of-type {
+            margin-top: 20px !important;
+        }
+        .bulletin-content p {
+            color: #475569;
         }
         .bulletin-content a {
-            color: #2563eb;
+            color: #465fff;
             text-decoration: none;
+            font-weight: 500;
         }
-        .bulletin-content a:hover {
-            text-decoration: underline;
-        }
+        .bulletin-content a:hover { text-decoration: underline; }
         .bulletin-content a:focus-visible {
-            outline: 2px solid #2563eb;
+            outline: 2px solid #465fff;
             outline-offset: 2px;
-            border-radius: 2px;
+            border-radius: 3px;
+        }
+        .bulletin-content table {
+            border: 1px solid #e8ecf1 !important;
+            border-radius: 12px !important;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .bulletin-content th {
+            background: #0f172a !important;
+            color: #fff !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 12px 14px !important;
+        }
+        .bulletin-content td {
+            font-size: 13px !important;
+            padding: 11px 14px !important;
+            border-color: #f1f5f9 !important;
+            color: #334155 !important;
+        }
+        .bulletin-content tr:hover td {
+            background: #f8fafc !important;
         }
 
-        .subscribe-card {
-            border-top: 3px solid #06284c;
+        /* Last updated table */
+        .bulletin-content > table:last-of-type {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
-        .subscribe-card h3 {
-            margin: 0 0 16px;
+        .bulletin-content > table:last-of-type td {
+            border: none !important;
+            padding: 3px 12px 3px 0 !important;
+            font-size: 12px !important;
+            color: #94a3b8 !important;
+            background: transparent !important;
+        }
+        .bulletin-content > table:last-of-type tr:hover td {
+            background: transparent !important;
+        }
+
+        /* ── Subscribe Card ── */
+        .subscribe-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .subscribe-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #465fff, #8b5cf6, #ec4899);
+            border-radius: 16px 16px 0 0;
+        }
+        .subscribe-title {
             font-size: 16px;
-            color: #06284c;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+        .subscribe-desc {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
         }
         .form-row {
             display: flex;
@@ -127,85 +255,105 @@
         }
         input[type="email"] {
             flex: 1;
-            min-width: 200px;
-            padding: 10px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            min-width: 240px;
+            padding: 11px 16px;
+            background: #f8f9fb;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
             font-size: 14px;
-            background: #f8fafc;
-            color: #1e293b;
-            transition: border-color 0.15s, box-shadow 0.15s;
+            color: #0f172a;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+        input[type="email"]::placeholder { color: #94a3b8; }
         input[type="email"]:focus-visible {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: #465fff;
+            box-shadow: 0 0 0 3px rgba(70,95,255,0.12);
+            background: #fff;
         }
         .checkbox-label {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
             font-size: 13px;
             color: #64748b;
             cursor: pointer;
             white-space: nowrap;
+            user-select: none;
         }
         input[type="checkbox"] {
-            accent-color: #06284c;
+            accent-color: #465fff;
             cursor: pointer;
+            width: 15px;
+            height: 15px;
         }
-        button[type="submit"] {
-            padding: 10px 24px;
+        .btn-submit {
+            padding: 11px 28px;
             border: none;
-            border-radius: 8px;
-            background-color: #06284c;
-            color: #ffffff;
+            border-radius: 10px;
+            background: #465fff;
+            color: #fff;
+            font-family: inherit;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            transition: background-color 0.15s, transform 0.1s;
+            transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
         }
-        button[type="submit"]:hover {
-            background-color: #0e4a80;
+        .btn-submit:hover {
+            background: #3b4fdb;
+            box-shadow: 0 4px 14px rgba(70,95,255,0.25);
         }
-        button[type="submit"]:active {
-            transform: scale(0.98);
-        }
-        button[type="submit"]:focus-visible {
-            outline: 2px solid #06284c;
+        .btn-submit:active { transform: scale(0.97); }
+        .btn-submit:focus-visible {
+            outline: 2px solid #465fff;
             outline-offset: 2px;
         }
         .subs-msg {
-            margin-top: 12px;
+            margin-top: 16px;
             font-size: 14px;
         }
         .subs-msg p {
             margin: 0;
-            padding: 10px 14px;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border-radius: 10px;
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
+            color: #166534;
+            font-weight: 500;
         }
 
+        /* ── Footer ── */
         footer {
             text-align: center;
-            padding: 24px 16px;
-            font-size: 13px;
+            padding: 32px 24px 48px;
         }
         footer a {
-            color: #64748b;
+            font-size: 13px;
+            color: #94a3b8;
             text-decoration: none;
-            margin: 0 12px;
+            margin: 0 16px;
+            transition: color 0.15s;
         }
-        footer a:hover {
-            color: #334155;
-            text-decoration: underline;
-        }
+        footer a:hover { color: #475569; }
         footer a:focus-visible {
-            outline: 2px solid #06284c;
+            outline: 2px solid #465fff;
             outline-offset: 2px;
-            border-radius: 2px;
+            border-radius: 3px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 680px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .container { padding: 20px 16px 60px; }
+            .card { padding: 20px; border-radius: 14px; }
+            .page-title h1 { font-size: 22px; }
+            .stat-value { font-size: 24px; }
+            .form-row { flex-direction: column; align-items: stretch; }
+            input[type="email"] { min-width: 0; }
+            .btn-submit { text-align: center; }
+            .topbar { padding: 0 16px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -217,30 +365,47 @@
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1>Visa Bulletin Checker</h1>
-        <p>Employment-Based Visa Final Action Dates &amp; Filing Dates</p>
-    </header>
+    <nav class="topbar">
+        <div class="topbar-brand">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Visa Bulletin Checker
+        </div>
+        <div class="topbar-links">
+            <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
+            <a href="mailto:imaginaryground@gmail.com">Contact</a>
+        </div>
+    </nav>
 
     <div class="container">
-        <div class="stats-row">
+        <div class="page-title">
+            <h1>Employment-Based Visa Bulletin</h1>
+            <p>Final Action Dates &amp; Dates for Filing, updated automatically from the U.S. Department of State.</p>
+        </div>
+
+        <div class="stats-grid">
             <div class="stat-card">
-                <p class="stat-label">Total Visits</p>
-                <p class="stat-value">{{ hits.total|int|comma }}</p>
+                <div class="stat-icon blue"><i class="fa-solid fa-eye" aria-hidden="true"></i></div>
+                <div class="stat-label">Total Visits</div>
+                <div class="stat-value">{{ hits.total|int|comma }}</div>
             </div>
             <div class="stat-card">
-                <p class="stat-label">Monthly</p>
-                <p class="stat-value">{{ hits.monthly|int|comma }}</p>
-                <p class="stat-sub">{{ current_month }}</p>
+                <div class="stat-icon purple"><i class="fa-solid fa-calendar" aria-hidden="true"></i></div>
+                <div class="stat-label">Monthly</div>
+                <div class="stat-value">{{ hits.monthly|int|comma }}</div>
+                <div class="stat-sub">{{ current_month }}</div>
             </div>
             <div class="stat-card">
-                <p class="stat-label">Today</p>
-                <p class="stat-value">{{ hits.daily|int|comma }}</p>
-                <p class="stat-sub">{{ current_date }}</p>
+                <div class="stat-icon emerald"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i></div>
+                <div class="stat-label">Today</div>
+                <div class="stat-value">{{ hits.daily|int|comma }}</div>
+                <div class="stat-sub">{{ current_date }}</div>
             </div>
             <div class="stat-card">
-                <p class="stat-label">Subscribers</p>
-                <p class="stat-value">{{ subscriber_count|int|comma }}</p>
+                <div class="stat-icon amber"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+                <div class="stat-label">Subscribers</div>
+                <div class="stat-value">{{ subscriber_count|int|comma }}</div>
             </div>
         </div>
 
@@ -250,15 +415,16 @@
             </div>
 
             <div class="card subscribe-card">
-                <h3>📬 Email Notifications</h3>
+                <div class="subscribe-title">📬 Get Notified</div>
+                <div class="subscribe-desc">Receive an email when a new Visa Bulletin is published.</div>
                 <form method="post">
                     <div class="form-row">
                         <label for="email-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Email Address</label>
-                        <input type="email" id="email-input" name="email" placeholder="Enter your email…" autocomplete="email" spellcheck="false" required>
+                        <input type="email" id="email-input" name="email" placeholder="you@example.com" autocomplete="email" spellcheck="false" required>
                         <label class="checkbox-label">
                             <input type="checkbox" name="unsubscribe" id="unsubscribe-checkbox" onchange="updateButtonText()"> Unsubscribe
                         </label>
-                        <button type="submit" id="submit-button">🔔 Subscribe</button>
+                        <button type="submit" id="submit-button" class="btn-submit">Subscribe</button>
                     </div>
                 </form>
                 <div class="subs-msg">
@@ -269,7 +435,7 @@
     </div>
 
     <footer>
-        <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fab fa-github" aria-hidden="true"></i> GitHub</a>
+        <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
         <a href="mailto:imaginaryground@gmail.com">📧 Contact</a>
     </footer>
 
@@ -277,7 +443,7 @@
         function updateButtonText() {
             var checkbox = document.getElementById('unsubscribe-checkbox');
             var button = document.getElementById('submit-button');
-            button.textContent = checkbox.checked ? '🔕 Unsubscribe' : '🔔 Subscribe';
+            button.textContent = checkbox.checked ? 'Unsubscribe' : 'Subscribe';
         }
     </script>
 </body>

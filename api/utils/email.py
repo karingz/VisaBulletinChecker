@@ -15,10 +15,13 @@ SMTP_PASS = os.getenv("SMTP_PASS")  # Set your email password in environment var
 
 def send_email(to_email, subject, body, bulletin_month):
     try:
-        # Append the link and unsubscribe note to the email body
         body += f"""
-                <br><br>
-                <p>🚀 <a href="https://visa-bulletin-checker.vercel.app/" target="_blank">Visit Visa Bulletin Checker Page</a> ⬅ 🔕 Unsubscribe here</p>
+                <hr style="border:none; border-top:1px solid #e2e8f0; margin:32px 0 16px;">
+                <p style="font-size:13px; color:#64748b;">
+                    🚀 <a href="https://visa-bulletin-checker.vercel.app/" target="_blank" style="color:#2563eb; text-decoration:none;">Visit Visa Bulletin Checker</a>
+                    &nbsp;&middot;&nbsp;
+                    🔕 <a href="https://visa-bulletin-checker.vercel.app/" target="_blank" style="color:#2563eb; text-decoration:none;">Unsubscribe</a>
+                </p>
                 """
 
         msg = MIMEMultipart()

@@ -3,95 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#e2edff">
+    <meta name="theme-color" content="#06284c">
     <title>Visa Bulletin Checker</title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Roboto Condensed', Arial, sans-serif;
-            background-color: #e2edff;
-            color: #06284c;
-            margin: 0;
-            padding: 16px;
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
-        a {
-            color: grey;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #06284c 0%, #0e4a80 100%);
+            color: #ffffff;
+            padding: 32px 24px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .header p {
+            margin: 8px 0 0;
+            font-size: 14px;
+            color: #94b8db;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 16px 48px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 16px 20px;
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin: 0 0 4px;
+        }
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #06284c;
+            font-variant-numeric: tabular-nums;
+            margin: 0;
+        }
+        .stat-sub {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 2px 0 0;
+        }
+
+        /* Override inline table styles for page display */
+        .bulletin-content table {
+            border-radius: 12px !important;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .bulletin-content h2 {
+            font-size: 22px;
+            color: #06284c;
+            margin: 0 0 8px;
+        }
+        .bulletin-content h3 {
+            font-size: 15px;
+            color: #334155;
+        }
+        .bulletin-content a {
+            color: #2563eb;
             text-decoration: none;
         }
-        a:hover {
+        .bulletin-content a:hover {
             text-decoration: underline;
         }
-        a:focus-visible {
-            outline: 2px solid #06284c;
+        .bulletin-content a:focus-visible {
+            outline: 2px solid #2563eb;
             outline-offset: 2px;
             border-radius: 2px;
         }
-        .result-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border: 2px solid #25324a;
-            border-radius: 16px;
-            overflow: hidden;
-            font-family: 'robotocondensed-regular-webfont', Arial, sans-serif;
-            font-size: 14px;
-            color: #444444;
+
+        .subscribe-card {
+            border-top: 3px solid #06284c;
         }
-        .result-table th, .result-table td {
-            padding: 12px 16px;
-            border: 1px solid #e6e6e6;
-            text-align: left;
-            font-variant-numeric: tabular-nums;
-        }
-        .result-table th {
-            background-color: #f2f2f2;
-            font-weight: 500;
-        }
-        .result-table tr:nth-child(odd) {
-            background-color: #ced9ea;
-        }
-        .result-table tr:nth-child(even) {
-            background-color: #e2edff;
-        }
-        .result-table tr:first-child th,
-        .result-table tr:first-child td {
-            background-color: #06284c;
-            color: #ffffff;
+        .subscribe-card h3 {
+            margin: 0 0 16px;
             font-size: 16px;
-            font-weight: bold;
+            color: #06284c;
         }
-        .hits-table {
-            font-size: 0.7em;
-            margin: 5px 0;
-            font-variant-numeric: tabular-nums;
-        }
-        .hits-table td {
-            padding-right: 20px;
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         input[type="email"] {
-            padding: 6px 10px;
-            border: 1px solid #aaa;
-            border-radius: 4px;
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
             font-size: 14px;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
         input[type="email"]:focus-visible {
-            outline: 2px solid #06284c;
-            outline-offset: 1px;
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #64748b;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        input[type="checkbox"] {
+            accent-color: #06284c;
+            cursor: pointer;
         }
         button[type="submit"] {
-            padding: 6px 16px;
-            border: 1px solid #25324a;
-            border-radius: 4px;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
             background-color: #06284c;
             color: #ffffff;
             font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            margin-left: 10px;
+            white-space: nowrap;
             transition: background-color 0.15s, transform 0.1s;
         }
         button[type="submit"]:hover {
-            background-color: #0e3d6b;
+            background-color: #0e4a80;
         }
         button[type="submit"]:active {
             transform: scale(0.98);
@@ -100,56 +176,108 @@
             outline: 2px solid #06284c;
             outline-offset: 2px;
         }
-        input[type="checkbox"] {
-            accent-color: #06284c;
+        .subs-msg {
+            margin-top: 12px;
+            font-size: 14px;
         }
-        label {
-            margin-left: 10px;
-            cursor: pointer;
+        .subs-msg p {
+            margin: 0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px 16px;
+            font-size: 13px;
+        }
+        footer a {
+            color: #64748b;
+            text-decoration: none;
+            margin: 0 12px;
+        }
+        footer a:hover {
+            color: #334155;
+            text-decoration: underline;
+        }
+        footer a:focus-visible {
+            outline: 2px solid #06284c;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
         }
     </style>
 </head>
 <body>
-    <main>
-        <section>
-            <p style="font-size: 0.7em;">📊 Page Hits:</p>
-            <table class="hits-table">
-                <tr>
-                    <td>Total: {{ hits.total|int|comma }}</td>
-                    <td>Monthly ({{ current_month }}): {{ hits.monthly|int|comma }}</td>
-                    <td>Daily ({{ current_date }}): {{ hits.daily|int|comma }}</td>
-                </tr>
-            </table>
-            <p style="font-size: 0.9em;">👥 Subscriber Count: {{ subscriber_count|int|comma }}</p>
-        </section>
-        <hr>
-        <section>
-            {{ result|safe }}
-        </section>
-        <hr>
-        <section>
-            <form method="post">
-                <label for="email-input" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Email address</label>
-                <input type="email" id="email-input" name="email" placeholder="Enter email…" autocomplete="email" spellcheck="false" required>
-                <label>
-                    <input type="checkbox" name="unsubscribe" id="unsubscribe-checkbox" onchange="updateButtonText()"> Unsubscribe
-                </label>
-                <button type="submit" id="submit-button">🔔 <strong>Submit</strong></button>
-            </form>
-        </section>
-        <div>
-            {{ subs_msg|safe }}
+    <header class="header">
+        <h1>Visa Bulletin Checker</h1>
+        <p>Employment-Based Visa Final Action Dates &amp; Filing Dates</p>
+    </header>
+
+    <div class="container">
+        <div class="stats-row">
+            <div class="stat-card">
+                <p class="stat-label">Total Visits</p>
+                <p class="stat-value">{{ hits.total|int|comma }}</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Monthly</p>
+                <p class="stat-value">{{ hits.monthly|int|comma }}</p>
+                <p class="stat-sub">{{ current_month }}</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Today</p>
+                <p class="stat-value">{{ hits.daily|int|comma }}</p>
+                <p class="stat-sub">{{ current_date }}</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Subscribers</p>
+                <p class="stat-value">{{ subscriber_count|int|comma }}</p>
+            </div>
         </div>
-    </main>
-    <footer style="margin-top: 32px;">
-        <p><a href='https://github.com/karingz/VisaBulletinChecker' target='_blank'><i class='fab fa-github' aria-hidden="true"></i> Visit GitHub Page</a></p>
-        <p>📧 <a href='mailto:imaginaryground@gmail.com'>Email Me</a></p>
+
+        <main>
+            <div class="card bulletin-content">
+                {{ result|safe }}
+            </div>
+
+            <div class="card subscribe-card">
+                <h3>📬 Email Notifications</h3>
+                <form method="post">
+                    <div class="form-row">
+                        <label for="email-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Email Address</label>
+                        <input type="email" id="email-input" name="email" placeholder="Enter your email…" autocomplete="email" spellcheck="false" required>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="unsubscribe" id="unsubscribe-checkbox" onchange="updateButtonText()"> Unsubscribe
+                        </label>
+                        <button type="submit" id="submit-button">🔔 Subscribe</button>
+                    </div>
+                </form>
+                <div class="subs-msg">
+                    {{ subs_msg|safe }}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fab fa-github" aria-hidden="true"></i> GitHub</a>
+        <a href="mailto:imaginaryground@gmail.com">📧 Contact</a>
     </footer>
+
     <script>
         function updateButtonText() {
-            const checkbox = document.getElementById('unsubscribe-checkbox');
-            const button = document.getElementById('submit-button');
-            button.innerHTML = checkbox.checked ? '🔕 <strong>Submit</strong>' : '🔔 <strong>Submit</strong>';
+            var checkbox = document.getElementById('unsubscribe-checkbox');
+            var button = document.getElementById('submit-button');
+            button.textContent = checkbox.checked ? '🔕 Unsubscribe' : '🔔 Subscribe';
         }
     </script>
 </body>

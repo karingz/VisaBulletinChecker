@@ -56,40 +56,79 @@ def extract_target_tables(soup):
 
 # Formatting Functions
 def format_table_html(table):
-    table_html = '<table class="result-table" width="100%" border="1" cellspacing="0" cellpadding="3">'
+    header_style = (
+        'style="background-color:#06284c; color:#ffffff; padding:10px 14px;'
+        ' font-size:14px; font-weight:600; text-align:left;'
+        ' border-bottom:2px solid #0e3d6b; font-variant-numeric:tabular-nums;"'
+    )
+    highlight_row_style = 'style="background-color:#fff3cd;"'
+    odd_row_style = 'style="background-color:#f0f4fa;"'
+    even_row_style = 'style="background-color:#ffffff;"'
+    cell_style = (
+        'style="padding:10px 14px; border-bottom:1px solid #e2e8f0;'
+        ' font-size:13px; text-align:left; font-variant-numeric:tabular-nums;"'
+    )
+
+    table_html = (
+        '<table width="100%" cellspacing="0" cellpadding="0"'
+        ' style="border-collapse:collapse; border:1px solid #d1d9e6;'
+        ' border-radius:8px; overflow:hidden; font-family:Arial, sans-serif;">'
+    )
     for row_index, row in enumerate(table.select("tr"), start=1):
-        style = ' style="background-color: yellow;"' if row_index == 3 else ""
-        table_html += f"<tr{style}>"
-        for col_index, col in enumerate(row.find_all(["th", "td"]), start=1):
-            tag = "th" if col.name == "th" else "td"
-            table_html += f"<{tag}>{col.get_text(strip=True).replace('\xa0', ' ')}</{tag}>"
+        if row_index == 1:
+            row_attr = ""
+        elif row_index == 3:
+            row_attr = f" {highlight_row_style}"
+        elif row_index % 2 == 0:
+            row_attr = f" {even_row_style}"
+        else:
+            row_attr = f" {odd_row_style}"
+        table_html += f"<tr{row_attr}>"
+        for col in row.find_all(["th", "td"]):
+            text = col.get_text(strip=True).replace('\xa0', ' ')
+            if row_index == 1:
+                table_html += f"<th {header_style}>{text}</th>"
+            else:
+                table_html += f"<td {cell_style}>{text}</td>"
         table_html += "</tr>"
     table_html += "</table>"
     return table_html
 
 def format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html, is_current):
+    link_style = 'style="color:#2563eb; text-decoration:none;"'
+    section_title_style = (
+        'style="font-size:15px; font-weight:600; color:#334155;'
+        ' margin:24px 0 12px 0; padding:0;"'
+    )
+
     if is_current:
-        msg = f"""
-        <pre><h2>📢 [Visa Bulletin] {bulletin_month}-{bulletin_year} Released!</h2></pre>
-        <pre><span>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></span></pre>
-        <pre><h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3></pre>
-        <pre>{final_action_html}</pre>
-        <pre><h3>📄 DATES FOR FILING OF EMPLOYMENT-BASED VISA APPLICATIONS:</h3></pre>
-        <pre>{filing_dates_html}</pre>
-        """
+        header = (
+            f'<h2 style="font-size:22px; color:#06284c; margin:0 0 8px 0;">'
+            f'📢 Visa Bulletin for {bulletin_month} {bulletin_year}</h2>'
+            f'<p style="margin:0 0 20px 0;">'
+            f'🔗 <a href="{matched_link}" target="_blank" {link_style}>'
+            f'View Official Bulletin</a></p>'
+        )
     else:
-        msg = f"""
-        <pre><h2>📢 [Visa Bulletin] {datetime.now().strftime('%B')}-{datetime.now().year} hasn't been released yet!</h2></pre>
-        <pre><p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p></pre>
-        <pre><p>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p></pre>
-        <pre><h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3></pre>
-        <pre>{final_action_html}</pre>
-        <pre><h3>📄 DATES FOR FILING OF EMPLOYMENT-BASED VISA APPLICATIONS:</h3></pre>
-        <pre>{filing_dates_html}</pre>"""
+        header = (
+            f'<h2 style="font-size:22px; color:#06284c; margin:0 0 8px 0;">'
+            f'📢 {datetime.now().strftime("%B")} {datetime.now().year} Bulletin Not Yet Released</h2>'
+            f'<p style="color:#64748b; margin:0 0 4px 0;">'
+            f'Showing the latest available: {bulletin_month} {bulletin_year}</p>'
+            f'<p style="margin:0 0 20px 0;">'
+            f'🔗 <a href="{matched_link}" target="_blank" {link_style}>'
+            f'View Official Bulletin</a></p>'
+        )
+
+    msg = header
+    msg += f'<h3 {section_title_style}>📄 Final Action Dates</h3>'
+    msg += final_action_html
+    if filing_dates_html:
+        msg += f'<h3 {section_title_style}>📄 Dates for Filing</h3>'
+        msg += filing_dates_html
     return msg
 
 def append_last_updated_time(msg):
-    from datetime import timezone as tz
     from zoneinfo import ZoneInfo
 
     kst_time = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M")
@@ -97,14 +136,17 @@ def append_last_updated_time(msg):
     cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M")
     est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M")
 
+    label_style = 'style="padding:4px 12px 4px 0; color:#64748b; font-size:12px;"'
+    time_style = 'style="padding:4px 0; color:#334155; font-size:12px; font-variant-numeric:tabular-nums;"'
+
     msg += f"""
-    <pre><table>
-        <tr><td colspan="2">⌛ Last updated time:</td></tr>
-        <tr><td>KST (Seoul)</td><td>{kst_time}</td></tr>
-        <tr><td>PST (LA)</td><td>{pst_time}</td></tr>
-        <tr><td>CST (Chicago)</td><td>{cst_time}</td></tr>
-        <tr><td>EST (NY)</td><td>{est_time}</td></tr>
-    </table></pre>
+    <table style="margin-top:24px; border-collapse:collapse; font-family:Arial, sans-serif;">
+        <tr><td colspan="2" style="padding:4px 0 8px 0; font-size:12px; color:#94a3b8; font-weight:600;">⌛ Last updated time:</td></tr>
+        <tr><td {label_style}>KST (Seoul)</td><td {time_style}>{kst_time}</td></tr>
+        <tr><td {label_style}>PST (LA)</td><td {time_style}>{pst_time}</td></tr>
+        <tr><td {label_style}>CST (Chicago)</td><td {time_style}>{cst_time}</td></tr>
+        <tr><td {label_style}>EST (NY)</td><td {time_style}>{est_time}</td></tr>
+    </table>
     """
     return msg
 

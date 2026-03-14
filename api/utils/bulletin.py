@@ -1,15 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
-import os
 
 BASE_URL = "https://travel.state.gov"
 INDEX_URL = f"{BASE_URL}/content/travel/en/legal/visa-law0/visa-bulletin.html"
-
-# Utility Functions
-def get_month_slug(dt):
-    return dt.strftime("visa-bulletin/%Y/visa-bulletin-for-%B-%Y.html").lower()
 
 def get_bulletin_date_from_slug(slug):
     parts = slug.split("/")[-1].replace("visa-bulletin-for-", "").replace(".html", "")
@@ -94,31 +88,20 @@ def format_table_html(table):
     table_html += "</table>"
     return table_html
 
-def format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html, is_current):
+def format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html):
     link_style = 'style="color:#2563eb; text-decoration:none;"'
     section_title_style = (
         'style="font-size:15px; font-weight:600; color:#334155;'
         ' margin:24px 0 12px 0; padding:0;"'
     )
 
-    if is_current:
-        header = (
-            f'<h2 style="font-size:22px; color:#06284c; margin:0 0 8px 0;">'
-            f'📢 Visa Bulletin for {bulletin_month} {bulletin_year}</h2>'
-            f'<p style="margin:0 0 20px 0;">'
-            f'🔗 <a href="{matched_link}" target="_blank" {link_style}>'
-            f'View Official Bulletin</a></p>'
-        )
-    else:
-        header = (
-            f'<h2 style="font-size:22px; color:#06284c; margin:0 0 8px 0;">'
-            f'📢 {datetime.now().strftime("%B")} {datetime.now().year} Bulletin Not Yet Released</h2>'
-            f'<p style="color:#64748b; margin:0 0 4px 0;">'
-            f'Showing the latest available: {bulletin_month} {bulletin_year}</p>'
-            f'<p style="margin:0 0 20px 0;">'
-            f'🔗 <a href="{matched_link}" target="_blank" {link_style}>'
-            f'View Official Bulletin</a></p>'
-        )
+    header = (
+        f'<h2 style="font-size:22px; color:#06284c; margin:0 0 8px 0;">'
+        f'📢 Visa Bulletin for {bulletin_month} {bulletin_year}</h2>'
+        f'<p style="margin:0 0 20px 0;">'
+        f'🔗 <a href="{matched_link}" target="_blank" {link_style}>'
+        f'View Official Bulletin</a></p>'
+    )
 
     msg = header
     msg += f'<h3 {section_title_style}>📄 Final Action Dates</h3>'
@@ -153,32 +136,23 @@ def append_last_updated_time(msg):
 # Main Function
 def run_check(return_month=False):
     try:
-        # Step 1: Determine which months to check
-        now = os.getenv("TEST_DATE")
-        now = datetime.strptime(now, "%Y-%m-%d") if now else datetime.now()
-        slugs_to_try = [get_month_slug(now), get_month_slug(now - relativedelta(months=1))]
-
-        # Step 2: Scrape the index page and find the current bulletin link
+        # Step 1: Scrape the index page and find the current bulletin link
         index_soup = fetch_index_page()
         href = find_current_bulletin_link(index_soup)
         matched_link = BASE_URL + href if href.startswith("/") else href
+
+        # Step 2: Extract month/year from the bulletin link
         matched_slug = href.split("/")[-1]
-
-        # Step 3: Check if the current bulletin matches the current month
         bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
-        is_current = bulletin_month.lower() == now.strftime("%B").lower() and bulletin_year == str(now.year)
-        if not is_current:
-            matched_slug = slugs_to_try[1].split("/")[-1]
-            bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
 
-        # Step 4: Scrape the bulletin page and extract the target tables
+        # Step 3: Scrape the bulletin page and extract the target tables
         bulletin_soup = fetch_bulletin_page(matched_link)
         tables = extract_target_tables(bulletin_soup)
 
-        # Step 5: Format the tables and message
+        # Step 4: Format the tables and message
         final_action_html = format_table_html(tables[0])
         filing_dates_html = format_table_html(tables[1]) if len(tables) > 1 else ""
-        msg = format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html, is_current)
+        msg = format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html)
         msg = append_last_updated_time(msg)
 
         if return_month:

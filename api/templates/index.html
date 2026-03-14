@@ -3,187 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0a0f1e">
+    <meta name="theme-color" content="#06284c">
     <title>Visa Bulletin Checker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg: #0a0f1e;
-            --surface: #111827;
-            --surface-2: #1e293b;
-            --border: rgba(255,255,255,0.06);
-            --border-hover: rgba(255,255,255,0.12);
-            --text: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --accent: #3b82f6;
-            --accent-hover: #60a5fa;
-            --accent-glow: rgba(59,130,246,0.15);
-            --green: #22c55e;
-            --amber: #f59e0b;
-            --radius: 16px;
-            --radius-sm: 10px;
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
         }
-
-        /* Header */
         .header {
-            position: relative;
-            padding: 48px 24px 40px;
+            background: linear-gradient(135deg, #06284c 0%, #0e4a80 100%);
+            color: #ffffff;
+            padding: 32px 24px;
             text-align: center;
-            overflow: hidden;
-        }
-        .header::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 60% 50% at 50% 0%, rgba(59,130,246,0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 40% at 70% 10%, rgba(139,92,246,0.08) 0%, transparent 60%);
-            pointer-events: none;
         }
         .header h1 {
-            font-size: 28px;
+            margin: 0;
+            font-size: 24px;
             font-weight: 700;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            letter-spacing: -0.02em;
         }
         .header p {
-            margin-top: 8px;
+            margin: 8px 0 0;
             font-size: 14px;
-            color: var(--text-muted);
-            font-weight: 400;
+            color: #94b8db;
         }
-
         .container {
-            max-width: 860px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 0 20px 64px;
+            padding: 24px 16px 48px;
         }
-
-        /* Stats */
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
         .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
             gap: 12px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 20px 16px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 16px 20px;
+            flex: 1;
+            min-width: 140px;
             text-align: center;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .stat-card:hover {
-            border-color: var(--border-hover);
-            box-shadow: 0 0 20px rgba(59,130,246,0.05);
         }
         .stat-label {
             font-size: 11px;
-            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin: 0 0 4px;
         }
         .stat-value {
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 700;
-            color: var(--text);
+            color: #06284c;
             font-variant-numeric: tabular-nums;
-            margin-top: 4px;
-            line-height: 1.2;
+            margin: 0;
         }
         .stat-sub {
             font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 2px;
+            color: #94a3b8;
+            margin: 2px 0 0;
         }
 
-        /* Cards */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px;
-            margin-bottom: 20px;
+        /* Override inline table styles for page display */
+        .bulletin-content table {
+            border-radius: 12px !important;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
-
-        /* Bulletin content overrides */
         .bulletin-content h2 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.02em;
+            font-size: 22px;
+            color: #06284c;
+            margin: 0 0 8px;
         }
         .bulletin-content h3 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary) !important;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+            font-size: 15px;
+            color: #334155;
         }
         .bulletin-content a {
-            color: var(--accent);
+            color: #2563eb;
             text-decoration: none;
-            transition: color 0.15s;
         }
         .bulletin-content a:hover {
-            color: var(--accent-hover);
+            text-decoration: underline;
         }
         .bulletin-content a:focus-visible {
-            outline: 2px solid var(--accent);
+            outline: 2px solid #2563eb;
             outline-offset: 2px;
-            border-radius: 3px;
-        }
-        .bulletin-content table {
-            border-radius: var(--radius-sm) !important;
-            border-color: var(--border) !important;
-            overflow: hidden;
-        }
-        .bulletin-content td, .bulletin-content th {
-            border-color: var(--border) !important;
-        }
-        .bulletin-content p {
-            color: var(--text-secondary);
+            border-radius: 2px;
         }
 
-        /* Subscribe section */
         .subscribe-card {
-            position: relative;
-            overflow: hidden;
-        }
-        .subscribe-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent), #8b5cf6);
+            border-top: 3px solid #06284c;
         }
         .subscribe-card h3 {
+            margin: 0 0 16px;
             font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 20px;
+            color: #06284c;
         }
         .form-row {
             display: flex;
@@ -193,122 +127,86 @@
         }
         input[type="email"] {
             flex: 1;
-            min-width: 220px;
-            padding: 12px 16px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-family: inherit;
+            min-width: 200px;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
             font-size: 14px;
-            color: var(--text);
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        input[type="email"]::placeholder {
-            color: var(--text-muted);
+            background: #f8fafc;
+            color: #1e293b;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
         input[type="email"]:focus-visible {
             outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
         .checkbox-label {
             display: flex;
             align-items: center;
             gap: 6px;
             font-size: 13px;
-            color: var(--text-secondary);
+            color: #64748b;
             cursor: pointer;
             white-space: nowrap;
-            user-select: none;
         }
         input[type="checkbox"] {
-            accent-color: var(--accent);
+            accent-color: #06284c;
             cursor: pointer;
-            width: 16px;
-            height: 16px;
         }
         button[type="submit"] {
-            padding: 12px 28px;
+            padding: 10px 24px;
             border: none;
-            border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, var(--accent) 0%, #2563eb 100%);
+            border-radius: 8px;
+            background-color: #06284c;
             color: #ffffff;
-            font-family: inherit;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
-            box-shadow: 0 0 16px var(--accent-glow);
+            transition: background-color 0.15s, transform 0.1s;
         }
         button[type="submit"]:hover {
-            opacity: 0.9;
-            box-shadow: 0 0 24px rgba(59,130,246,0.25);
+            background-color: #0e4a80;
         }
         button[type="submit"]:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
         }
         button[type="submit"]:focus-visible {
-            outline: 2px solid var(--accent);
+            outline: 2px solid #06284c;
             outline-offset: 2px;
         }
         .subs-msg {
-            margin-top: 16px;
+            margin-top: 12px;
             font-size: 14px;
         }
         .subs-msg p {
             margin: 0;
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            background: rgba(34,197,94,0.1);
-            border: 1px solid rgba(34,197,94,0.2);
-            color: var(--green);
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
         }
 
-        /* Footer */
         footer {
             text-align: center;
-            padding: 32px 20px;
-            border-top: 1px solid var(--border);
+            padding: 24px 16px;
+            font-size: 13px;
         }
         footer a {
-            color: var(--text-muted);
+            color: #64748b;
             text-decoration: none;
-            margin: 0 16px;
-            font-size: 13px;
-            transition: color 0.15s;
+            margin: 0 12px;
         }
         footer a:hover {
-            color: var(--text-secondary);
+            color: #334155;
+            text-decoration: underline;
         }
         footer a:focus-visible {
-            outline: 2px solid var(--accent);
+            outline: 2px solid #06284c;
             outline-offset: 2px;
-            border-radius: 3px;
+            border-radius: 2px;
         }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-            .stats-row {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .header h1 { font-size: 22px; }
-            .card { padding: 20px; }
-            .form-row { flex-direction: column; align-items: stretch; }
-            input[type="email"] { min-width: 0; }
-            button[type="submit"] { text-align: center; }
-        }
-
-        /* Animations */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .stats-row, .card {
-            animation: fadeUp 0.4s ease-out both;
-        }
-        .card:nth-child(2) { animation-delay: 0.08s; }
-        .card:nth-child(3) { animation-delay: 0.16s; }
 
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -316,12 +214,6 @@
                 animation: none !important;
             }
         }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -333,22 +225,22 @@
     <div class="container">
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-label">Total Visits</div>
-                <div class="stat-value">{{ hits.total|int|comma }}</div>
+                <p class="stat-label">Total Visits</p>
+                <p class="stat-value">{{ hits.total|int|comma }}</p>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Monthly</div>
-                <div class="stat-value">{{ hits.monthly|int|comma }}</div>
-                <div class="stat-sub">{{ current_month }}</div>
+                <p class="stat-label">Monthly</p>
+                <p class="stat-value">{{ hits.monthly|int|comma }}</p>
+                <p class="stat-sub">{{ current_month }}</p>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Today</div>
-                <div class="stat-value">{{ hits.daily|int|comma }}</div>
-                <div class="stat-sub">{{ current_date }}</div>
+                <p class="stat-label">Today</p>
+                <p class="stat-value">{{ hits.daily|int|comma }}</p>
+                <p class="stat-sub">{{ current_date }}</p>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Subscribers</div>
-                <div class="stat-value">{{ subscriber_count|int|comma }}</div>
+                <p class="stat-label">Subscribers</p>
+                <p class="stat-value">{{ subscriber_count|int|comma }}</p>
             </div>
         </div>
 
@@ -377,7 +269,7 @@
     </div>
 
     <footer>
-        <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
+        <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fab fa-github" aria-hidden="true"></i> GitHub</a>
         <a href="mailto:imaginaryground@gmail.com">📧 Contact</a>
     </footer>
 

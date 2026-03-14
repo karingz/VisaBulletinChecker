@@ -11,4 +11,5 @@ jobs:
     steps:
       - name: Call Check Bulletin API
         run: |
-          curl -X GET https://visa-bulletin-checker.vercel.app/api/check_bulletin
+          curl -X GET https://visa-bulletin-checker.vercel.app/api/check_bulletin \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

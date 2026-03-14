@@ -1,13 +1,19 @@
-from flask import Flask
+import os
+from flask import Flask, request
 from api.utils.bulletin import run_check
 from api.utils.db import get_cached_bulletin, save_cached_bulletin
 from api.utils.subscription import load_subscriptions, save_subscriptions
 from api.utils.email import send_email
 
+CRON_SECRET = os.getenv("CRON_SECRET")
+
 app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
 def check_bulletin():
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if not CRON_SECRET or token != CRON_SECRET:
+        return {"statusCode": 401, "body": "Unauthorized"}, 401
     # Check what's currently cached
     cache = get_cached_bulletin()
     cached_month = cache["bulletin_month"] if cache else None

@@ -9,7 +9,7 @@ CRON_SECRET = os.getenv("CRON_SECRET")
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET"])
+@app.route("/api/check_bulletin", methods=["GET"])
 def check_bulletin():
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not CRON_SECRET or token != CRON_SECRET:

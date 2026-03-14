@@ -11,8 +11,14 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def check_bulletin():
+    user_agent = (request.headers.get("User-Agent") or "").lower()
+    is_bot = any(kw in user_agent for kw in [
+        "bot", "crawler", "spider", "slurp", "curl", "wget", "python",
+        "scraper", "headless", "phantom", "lighthouse", "pingdom",
+        "uptimerobot", "monitor", "check", "scan", "fetch",
+    ])
     visitor_ip = request.headers.get("x-forwarded-for", request.remote_addr)
-    hits = update_hit_counts(ip=visitor_ip)
+    hits = update_hit_counts(ip=visitor_ip if not is_bot else None)
     subscriber_count = get_subscriber_count()
 
     # Use cached bulletin if available, otherwise scrape and cache

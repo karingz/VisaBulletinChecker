@@ -82,12 +82,11 @@ def update_hit_counts(ip=None):
         hits["monthly"] = 0
         hits["last_monthly_reset"] = first_of_month
 
-    # Only count if IP not seen in the last hour
-    if ip and is_recent_visitor(ip):
+    # Skip counting for bots (no IP provided) or recent visitors
+    if not ip or is_recent_visitor(ip):
         return hits
 
-    if ip:
-        record_visitor(ip)
+    record_visitor(ip)
 
     hits["total"] += 1
     hits["daily"] += 1

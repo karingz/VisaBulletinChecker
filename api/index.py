@@ -2,9 +2,10 @@ from flask import Flask, request, render_template
 from datetime import datetime
 
 from api.utils.bulletin import run_check
+from api.utils.db import get_cached_bulletin, save_cached_bulletin
 from api.utils.hits import update_hit_counts
-from api.utils.subscription import load_subscriptions, save_subscriptions, handle_subscription, get_subscriber_count
-from api.utils.email import is_valid_email, send_email
+from api.utils.subscription import handle_subscription, get_subscriber_count
+from api.utils.email import is_valid_email
 
 app = Flask(__name__)
 
@@ -13,22 +14,15 @@ def check_bulletin():
     hits = update_hit_counts()
     subscriber_count = get_subscriber_count()
 
-    result, bulletin_month = run_check(return_month=True)
-
-    subscriptions = load_subscriptions()
-    for subscription in subscriptions:
-        email = subscription["email"]
-        last_sent_month = subscription["last_sent_month"]
-
-        if last_sent_month != bulletin_month:
-            subject = f"Visa Bulletin for {bulletin_month}"
-            body = result.split("⌛ Last updated time:")[0]
-            if not send_email(email, subject, body, bulletin_month):
-                # Remove the email from the database if sending fails
-                save_subscriptions({"emails": [email], "unsubscribe": True})
-                print(f"❌ Failed to send email to {email}. Unsubscribing.")
-            else:
-                save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})
+    # Use cached bulletin if available, otherwise scrape and cache
+    cache = get_cached_bulletin()
+    if cache and cache["result"]:
+        result = cache["result"]
+        bulletin_month = cache["bulletin_month"]
+    else:
+        result, bulletin_month = run_check(return_month=True)
+        if bulletin_month:
+            save_cached_bulletin(result, bulletin_month)
 
     subs_msg = ""
     if request.method == "POST":

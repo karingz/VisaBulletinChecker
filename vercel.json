@@ -1,8 +1,10 @@
 {
   "builds": [
-    { "src": "api/index.py", "use": "@vercel/python" }
+    { "src": "api/index.py", "use": "@vercel/python" },
+    { "src": "api/check_bulletin.py", "use": "@vercel/python" }
   ],
   "routes": [
+    { "src": "/api/check_bulletin", "dest": "api/check_bulletin.py" },
     { "src": "/(.*)", "dest": "api/index.py" }
   ]
 }

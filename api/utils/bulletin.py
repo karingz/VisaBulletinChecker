@@ -42,13 +42,17 @@ def fetch_bulletin_page(link):
     except Exception as e:
         raise RuntimeError(f"Failed to fetch bulletin page: {e}")
 
-def extract_target_table(soup):
+def extract_target_tables(soup):
+    tables = []
     for bold in soup.find_all("b"):
-        if "Employment-" in bold.get_text():
+        text = bold.get_text()
+        if "Employment-" in text:
             table = bold.find_parent("table")
-            if table:
-                return table
-    raise ValueError("Could not find the target table in the bulletin page.")
+            if table and table not in tables:
+                tables.append(table)
+    if not tables:
+        raise ValueError("Could not find the target tables in the bulletin page.")
+    return tables
 
 # Formatting Functions
 def format_table_html(table):
@@ -63,13 +67,15 @@ def format_table_html(table):
     table_html += "</table>"
     return table_html
 
-def format_message(matched_link, bulletin_month, bulletin_year, table_html, is_current):
+def format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html, is_current):
     if is_current:
         msg = f"""
         <pre><h2>📢 [Visa Bulletin] {bulletin_month}-{bulletin_year} Released!</h2></pre>
         <pre><span>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></span></pre>
         <pre><h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3></pre>
-        <pre>{table_html}</pre>
+        <pre>{final_action_html}</pre>
+        <pre><h3>📄 DATES FOR FILING OF EMPLOYMENT-BASED VISA APPLICATIONS:</h3></pre>
+        <pre>{filing_dates_html}</pre>
         """
     else:
         msg = f"""
@@ -77,7 +83,9 @@ def format_message(matched_link, bulletin_month, bulletin_year, table_html, is_c
         <pre><p>Showing the bulletin for {bulletin_month}-{bulletin_year}.</p></pre>
         <pre><p>🔗 <a href="{matched_link}" target="_blank">Official Visa Bulletin for {bulletin_month} {bulletin_year}</a></p></pre>
         <pre><h3>📄 FINAL ACTION DATES FOR EMPLOYMENT-BASED CASES:</h3></pre>
-        <pre>{table_html}</pre>"""
+        <pre>{final_action_html}</pre>
+        <pre><h3>📄 DATES FOR FILING OF EMPLOYMENT-BASED VISA APPLICATIONS:</h3></pre>
+        <pre>{filing_dates_html}</pre>"""
     return msg
 
 def append_last_updated_time(msg):
@@ -121,13 +129,14 @@ def run_check(return_month=False):
             matched_slug = slugs_to_try[1].split("/")[-1]
             bulletin_month, bulletin_year = get_bulletin_date_from_slug(matched_slug)
 
-        # Step 4: Scrape the bulletin page and extract the target table
+        # Step 4: Scrape the bulletin page and extract the target tables
         bulletin_soup = fetch_bulletin_page(matched_link)
-        target_table = extract_target_table(bulletin_soup)
+        tables = extract_target_tables(bulletin_soup)
 
-        # Step 5: Format the table and message
-        table_html = format_table_html(target_table)
-        msg = format_message(matched_link, bulletin_month, bulletin_year, table_html, is_current)
+        # Step 5: Format the tables and message
+        final_action_html = format_table_html(tables[0])
+        filing_dates_html = format_table_html(tables[1]) if len(tables) > 1 else ""
+        msg = format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html, is_current)
         msg = append_last_updated_time(msg)
 
         if return_month:

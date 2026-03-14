@@ -4,7 +4,7 @@ from datetime import datetime
 from api.utils.bulletin import run_check
 from api.utils.db import get_cached_bulletin, save_cached_bulletin
 from api.utils.hits import update_hit_counts
-from api.utils.subscription import handle_subscription, get_subscriber_count
+from api.utils.subscription import handle_subscription, get_subscriber_count, unsubscribe_email
 from api.utils.email import is_valid_email
 
 app = Flask(__name__)
@@ -44,6 +44,13 @@ def check_bulletin():
         result=result,
         subs_msg=subs_msg,
     )
+
+@app.route("/unsubscribe", methods=["GET"])
+def unsubscribe():
+    email = request.args.get("email", "")
+    if email and unsubscribe_email(email):
+        return render_template("unsubscribe.html", message=f"✅ {email} has been unsubscribed.")
+    return render_template("unsubscribe.html", message="❌ Email not found or already unsubscribed.")
 
 @app.template_filter('comma')
 def format_with_commas(value):

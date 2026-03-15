@@ -264,6 +264,36 @@
         .history-table .col-date { white-space: nowrap; font-weight: 500; }
         .history-table .col-diff { white-space: nowrap; text-align: center; min-width: 90px; }
 
+        /* ── Floating Buttons ── */
+        .float-btns {
+            position: fixed;
+            right: 20px;
+            bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 20;
+        }
+        .float-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: rgba(30,41,59,0.9);
+            backdrop-filter: blur(8px);
+            color: #94a3b8;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .float-btn:hover {
+            border-color: #465fff;
+            color: #f1f5f9;
+        }
+
         /* ── Footer ── */
         footer {
             text-align: center;
@@ -419,6 +449,11 @@
         </div>
     </div>
 
+    <div class="float-btns">
+        <button class="float-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Top"><i class="fa-solid fa-chevron-up"></i></button>
+        <button class="float-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Bottom"><i class="fa-solid fa-chevron-down"></i></button>
+    </div>
+
     <footer>
         <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
         <a href="mailto:imaginaryground@gmail.com">Contact</a>
@@ -469,6 +504,27 @@
         var fadData = {{ chart_fad|safe }};
         var filingData = {{ chart_filing|safe }};
 
+        // Vertical crosshair line plugin
+        var crosshairPlugin = {
+            id: 'crosshair',
+            afterDraw: function(chart) {
+                if (chart.tooltip._active && chart.tooltip._active.length) {
+                    var x = chart.tooltip._active[0].element.x;
+                    var yAxis = chart.scales.y;
+                    var ctx = chart.ctx;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x, yAxis.top);
+                    ctx.lineTo(x, yAxis.bottom);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = 'rgba(148,163,184,0.4)';
+                    ctx.setLineDash([4, 3]);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        };
+
         var ctx = document.getElementById('historyChart').getContext('2d');
         var chart = new Chart(ctx, {
             type: 'line',
@@ -498,6 +554,7 @@
                     }
                 ]
             },
+            plugins: [crosshairPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -610,6 +667,45 @@
             // Clear active button since we're in custom range
             document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
         }, { passive: false });
+
+        // Touch drag to pan chart horizontally on mobile
+        (function() {
+            var el = document.getElementById('historyChart');
+            var startX = null;
+            var startMin = null;
+            var startMax = null;
+
+            el.addEventListener('touchstart', function(e) {
+                if (e.touches.length !== 1) return;
+                startX = e.touches[0].clientX;
+                startMin = chart.scales.x.min;
+                startMax = chart.scales.x.max;
+            }, { passive: true });
+
+            el.addEventListener('touchmove', function(e) {
+                if (startX === null || e.touches.length !== 1) return;
+                e.preventDefault();
+                var dx = e.touches[0].clientX - startX;
+                var chartWidth = chart.chartArea.right - chart.chartArea.left;
+                var range = startMax - startMin;
+                var shift = -(dx / chartWidth) * range;
+
+                var newMin = startMin + shift;
+                var newMax = startMax + shift;
+
+                var dataMin = fadData.length ? new Date(fadData[0].x).getTime() : startMin;
+                var dataMax = fadData.length ? new Date(fadData[fadData.length - 1].x).getTime() : startMax;
+                if (newMin < dataMin) { newMax += dataMin - newMin; newMin = dataMin; }
+                if (newMax > dataMax) { newMin -= newMax - dataMax; newMax = dataMax; }
+
+                chart.options.scales.x.min = newMin;
+                chart.options.scales.x.max = newMax;
+                chart.update('none');
+                document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
+            }, { passive: false });
+
+            el.addEventListener('touchend', function() { startX = null; }, { passive: true });
+        })();
     </script>
 </body>
 </html>

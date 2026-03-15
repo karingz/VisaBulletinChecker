@@ -202,18 +202,22 @@ def append_last_updated_time(msg):
     pst_time = datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M")
     cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M")
     est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M")
+    utc_iso = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    label_style = 'style="padding:4px 12px 4px 0; color:#64748b; font-size:12px;"'
-    time_style = 'style="padding:4px 0; color:#334155; font-size:12px; font-variant-numeric:tabular-nums;"'
+    label_style = 'style="padding:3px 6px 3px 0; color:#64748b; font-size:12px; white-space:nowrap;"'
+    time_style = 'style="padding:3px 0; font-size:12px; font-variant-numeric:tabular-nums;" class="updated-time"'
 
     msg += f"""
-    <table style="margin-top:24px; border-collapse:collapse; font-family:Arial, sans-serif;">
-        <tr><td colspan="2" style="padding:4px 0 8px 0; font-size:12px; color:#94a3b8; font-weight:600;">⌛ Last updated time:</td></tr>
-        <tr><td {label_style}>KST (Seoul)</td><td {time_style}>{kst_time}</td></tr>
-        <tr><td {label_style}>PST (LA)</td><td {time_style}>{pst_time}</td></tr>
-        <tr><td {label_style}>CST (Chicago)</td><td {time_style}>{cst_time}</td></tr>
-        <tr><td {label_style}>EST (NY)</td><td {time_style}>{est_time}</td></tr>
-    </table>
+    <div id="last-updated-wrap" data-utc="{utc_iso}" style="margin-top:24px; display:flex; align-items:center; gap:10px;">
+        <canvas id="update-clock" width="28" height="28" style="flex-shrink:0;"></canvas>
+        <table style="border-collapse:collapse; font-family:Arial, sans-serif;">
+            <tr><td colspan="2" style="padding:3px 0 6px 0; font-size:12px; color:#94a3b8; font-weight:600;">⌛ Last updated</td></tr>
+            <tr><td {label_style}>KST</td><td {time_style}>{kst_time}</td></tr>
+            <tr><td {label_style}>PST</td><td {time_style}>{pst_time}</td></tr>
+            <tr><td {label_style}>CST</td><td {time_style}>{cst_time}</td></tr>
+            <tr><td {label_style}>EST</td><td {time_style}>{est_time}</td></tr>
+        </table>
+    </div>
     """
     return msg
 

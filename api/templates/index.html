@@ -225,24 +225,28 @@
             color: #f1f5f9 !important;
         }
 
-        /* Last updated table */
-        .bulletin-content > table:last-of-type {
+        /* Last updated section */
+        #last-updated-wrap {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        #last-updated-wrap table {
             border: none !important;
             box-shadow: none !important;
             background: transparent !important;
         }
-        .bulletin-content > table:last-of-type td {
+        #last-updated-wrap td {
             border: none !important;
-            padding: 3px 12px 3px 0 !important;
+            padding: 3px 6px 3px 0 !important;
             font-size: 12px !important;
             color: #64748b !important;
             background: transparent !important;
             font-weight: 400 !important;
         }
-        .bulletin-content > table:last-of-type tr:hover td {
+        #last-updated-wrap tr:hover td {
             background: transparent !important;
             font-weight: 400 !important;
-            color: #64748b !important;
+            text-shadow: none !important;
         }
 
         /* ── Country Selector ── */
@@ -622,7 +626,8 @@
                 var headers = headerRow.querySelectorAll('th');
                 if (headers.length < 3) return;
                 var colIdx = -1;
-                headers.forEach(function(th, i) { if (th.textContent.trim() === target) colIdx = i; });
+                var targetLower = target.toLowerCase();
+                headers.forEach(function(th, i) { if (th.textContent.trim().toLowerCase().indexOf(targetLower) >= 0) colIdx = i; });
                 if (colIdx <= 1) return;
                 table.querySelectorAll('tr').forEach(function(row) {
                     var cells = Array.from(row.children);
@@ -675,6 +680,69 @@
                 var cell = eb2Rows[1].querySelector('td:nth-child(2)');
                 if (cell) { cell.classList.add('has-badge'); cell.innerHTML += '<span class="change-badge">' + filingDiff + '</span>'; }
             }
+        })();
+
+        // Last-updated: glow color + pie clock
+        (function() {
+            var wrap = document.getElementById('last-updated-wrap');
+            if (!wrap) return;
+            var utc = wrap.getAttribute('data-utc');
+            if (!utc) return;
+            var updatedAt = new Date(utc).getTime();
+            var HOUR = 3600000;
+            var canvas = document.getElementById('update-clock');
+            var ctx2d = canvas ? canvas.getContext('2d') : null;
+
+            function tick() {
+                var elapsed = Date.now() - updatedAt;
+                var ratio = Math.min(elapsed / HOUR, 1);
+
+                // Color: from dim (#64748b) to bright glow (#60a5fa)
+                var r = Math.round(100 + ratio * (96 - 100));
+                var g = Math.round(116 + ratio * (165 - 116));
+                var b = Math.round(139 + ratio * (250 - 139));
+                var color = 'rgb(' + r + ',' + g + ',' + b + ')';
+                var glow = 'rgba(96,165,250,' + (ratio * 0.6).toFixed(2) + ')';
+
+                document.querySelectorAll('.updated-time').forEach(function(el) {
+                    el.style.color = color;
+                    el.style.textShadow = ratio > 0.1 ? '0 0 ' + Math.round(ratio * 8) + 'px ' + glow : 'none';
+                });
+
+                // Pie clock: shows remaining time to next update
+                if (ctx2d) {
+                    var s = 28, cx = s / 2, cy = s / 2, r2 = 10;
+                    ctx2d.clearRect(0, 0, s, s);
+
+                    // Background circle
+                    ctx2d.beginPath();
+                    ctx2d.arc(cx, cy, r2, 0, Math.PI * 2);
+                    ctx2d.fillStyle = '#1e293b';
+                    ctx2d.fill();
+                    ctx2d.strokeStyle = '#334155';
+                    ctx2d.lineWidth = 1.5;
+                    ctx2d.stroke();
+
+                    // Filled pie (elapsed portion)
+                    if (ratio > 0) {
+                        ctx2d.beginPath();
+                        ctx2d.moveTo(cx, cy);
+                        ctx2d.arc(cx, cy, r2 - 1, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
+                        ctx2d.closePath();
+                        ctx2d.fillStyle = ratio < 0.5 ? 'rgba(96,165,250,0.3)' : ratio < 0.8 ? 'rgba(96,165,250,0.5)' : 'rgba(96,165,250,0.7)';
+                        ctx2d.fill();
+                    }
+
+                    // Center dot
+                    ctx2d.beginPath();
+                    ctx2d.arc(cx, cy, 1.5, 0, Math.PI * 2);
+                    ctx2d.fillStyle = '#64748b';
+                    ctx2d.fill();
+                }
+            }
+
+            tick();
+            setInterval(tick, 10000);
         })();
     </script>
 </body>

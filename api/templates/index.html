@@ -225,29 +225,14 @@
             color: #f1f5f9 !important;
         }
 
-        /* Last updated section */
-        #last-updated-wrap,
-        #last-updated-wrap table {
+        /* Last updated clock */
+        #last-updated-wrap {
             border: none !important;
             box-shadow: none !important;
             background: transparent !important;
             overflow: visible !important;
             border-radius: 0 !important;
             min-width: 0 !important;
-        }
-        #last-updated-wrap td {
-            border: none !important;
-            background: transparent !important;
-            font-weight: 400 !important;
-        }
-        #last-updated-wrap tr:hover td {
-            background: transparent !important;
-            font-weight: 400 !important;
-            text-shadow: none !important;
-            color: #64748b !important;
-        }
-        #update-clock {
-            display: block !important;
         }
 
         /* ── Country Selector ── */
@@ -462,7 +447,6 @@
             .topbar-links .nav-glow { margin-right: 4px !important; }
             .bulletin-content { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             .bulletin-content table { min-width: 600px; }
-            #last-updated-wrap td { padding: 2px 4px 2px 0 !important; font-size: 11px !important; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -684,7 +668,7 @@
             }
         })();
 
-        // Last-updated: glow color + pie clock
+        // 1-hour countdown clock
         (function() {
             var wrap = document.getElementById('last-updated-wrap');
             if (!wrap) return;
@@ -693,54 +677,68 @@
             var updatedAt = new Date(utc).getTime();
             var HOUR = 3600000;
             var canvas = document.getElementById('update-clock');
+            var minEl = document.getElementById('update-minutes');
             var ctx2d = canvas ? canvas.getContext('2d') : null;
 
             function tick() {
                 var elapsed = Date.now() - updatedAt;
                 var ratio = Math.min(elapsed / HOUR, 1);
+                var leftMin = Math.max(0, Math.ceil((HOUR - elapsed) / 60000));
 
-                // Color: from dim (#64748b) to bright glow (#60a5fa)
-                var r = Math.round(100 + ratio * (96 - 100));
-                var g = Math.round(116 + ratio * (165 - 116));
-                var b = Math.round(139 + ratio * (250 - 139));
-                var color = 'rgb(' + r + ',' + g + ',' + b + ')';
-                var glow = 'rgba(96,165,250,' + (ratio * 0.6).toFixed(2) + ')';
-
-                document.querySelectorAll('.updated-time').forEach(function(el) {
-                    el.style.color = color;
-                    el.style.textShadow = ratio > 0.1 ? '0 0 ' + Math.round(ratio * 8) + 'px ' + glow : 'none';
-                });
-
-                // Pie clock: shows remaining time to next update
-                if (ctx2d) {
-                    var s = 24, cx = s / 2, cy = s / 2, r2 = 9;
-                    ctx2d.clearRect(0, 0, s, s);
-
-                    // Background circle
-                    ctx2d.beginPath();
-                    ctx2d.arc(cx, cy, r2, 0, Math.PI * 2);
-                    ctx2d.fillStyle = '#1e293b';
-                    ctx2d.fill();
-                    ctx2d.strokeStyle = '#334155';
-                    ctx2d.lineWidth = 1.5;
-                    ctx2d.stroke();
-
-                    // Filled pie (elapsed portion)
-                    if (ratio > 0) {
-                        ctx2d.beginPath();
-                        ctx2d.moveTo(cx, cy);
-                        ctx2d.arc(cx, cy, r2 - 1, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
-                        ctx2d.closePath();
-                        ctx2d.fillStyle = ratio < 0.5 ? 'rgba(96,165,250,0.3)' : ratio < 0.8 ? 'rgba(96,165,250,0.5)' : 'rgba(96,165,250,0.7)';
-                        ctx2d.fill();
-                    }
-
-                    // Center dot
-                    ctx2d.beginPath();
-                    ctx2d.arc(cx, cy, 1.5, 0, Math.PI * 2);
-                    ctx2d.fillStyle = '#64748b';
-                    ctx2d.fill();
+                // Update minutes text
+                if (minEl) {
+                    if (ratio >= 1) minEl.textContent = 'updating soon...';
+                    else minEl.textContent = leftMin + ' min left';
                 }
+
+                if (!ctx2d) return;
+                var s = 64, cx = s / 2, cy = s / 2, R = 27;
+                ctx2d.clearRect(0, 0, s, s);
+
+                // Outer ring
+                ctx2d.beginPath();
+                ctx2d.arc(cx, cy, R, 0, Math.PI * 2);
+                ctx2d.strokeStyle = '#334155';
+                ctx2d.lineWidth = 2;
+                ctx2d.stroke();
+
+                // Tick marks (12 marks for 5-min intervals)
+                for (var i = 0; i < 12; i++) {
+                    var angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+                    var inner = i % 3 === 0 ? R - 6 : R - 4;
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+                    ctx2d.lineTo(cx + Math.cos(angle) * (R - 1), cy + Math.sin(angle) * (R - 1));
+                    ctx2d.strokeStyle = i % 3 === 0 ? '#94a3b8' : '#475569';
+                    ctx2d.lineWidth = i % 3 === 0 ? 1.5 : 1;
+                    ctx2d.stroke();
+                }
+
+                // Elapsed arc (colored)
+                if (ratio > 0) {
+                    ctx2d.beginPath();
+                    ctx2d.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
+                    var arcColor = ratio < 0.5 ? 'rgba(96,165,250,0.6)' : ratio < 0.8 ? 'rgba(96,165,250,0.8)' : '#60a5fa';
+                    ctx2d.strokeStyle = arcColor;
+                    ctx2d.lineWidth = 3;
+                    ctx2d.stroke();
+                }
+
+                // Hand
+                var handAngle = -Math.PI / 2 + ratio * Math.PI * 2;
+                ctx2d.beginPath();
+                ctx2d.moveTo(cx, cy);
+                ctx2d.lineTo(cx + Math.cos(handAngle) * (R - 8), cy + Math.sin(handAngle) * (R - 8));
+                ctx2d.strokeStyle = '#60a5fa';
+                ctx2d.lineWidth = 2;
+                ctx2d.lineCap = 'round';
+                ctx2d.stroke();
+
+                // Center dot
+                ctx2d.beginPath();
+                ctx2d.arc(cx, cy, 3, 0, Math.PI * 2);
+                ctx2d.fillStyle = '#60a5fa';
+                ctx2d.fill();
             }
 
             tick();

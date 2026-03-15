@@ -197,30 +197,12 @@ def format_message(matched_link, bulletin_month, bulletin_year, final_action_htm
 
 def append_last_updated_time(msg):
     from zoneinfo import ZoneInfo
-
-    kst_time = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M")
-    cst_china = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
-    ist_time = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M")
-    cdt_mexico = datetime.now(ZoneInfo("America/Mexico_City")).strftime("%Y-%m-%d %H:%M")
-    pht_time = datetime.now(ZoneInfo("Asia/Manila")).strftime("%Y-%m-%d %H:%M")
-    pst_time = datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M")
-    cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M")
-    est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M")
     utc_iso = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    lb = 'style="padding:3px 8px 3px 0; color:#64748b; font-size:12px; white-space:nowrap;"'
-    tm = 'class="updated-time" style="padding:3px 0; font-size:12px; font-variant-numeric:tabular-nums;"'
-    sp = 'style="padding:3px 20px 3px 0;"'
-
     msg += f"""
-    <div id="last-updated-wrap" data-utc="{utc_iso}" style="margin-top:24px;">
-        <div style="font-size:12px; color:#94a3b8; font-weight:600; margin-bottom:8px;">⌛ Last updated <canvas id="update-clock" width="24" height="24" style="display:inline-block; vertical-align:middle; margin-left:6px;"></canvas></div>
-        <table style="border-collapse:collapse; font-family:Arial, sans-serif;">
-            <tr><td {lb}>KST (Seoul)</td><td {tm}>{kst_time}</td><td {sp}></td><td {lb}>PHT (Manila)</td><td {tm}>{pht_time}</td></tr>
-            <tr><td {lb}>CST (Beijing)</td><td {tm}>{cst_china}</td><td {sp}></td><td {lb}>IST (Delhi)</td><td {tm}>{ist_time}</td></tr>
-            <tr><td {lb}>EST (NY)</td><td {tm}>{est_time}</td><td {sp}></td><td {lb}>CST (Chicago)</td><td {tm}>{cst_time}</td></tr>
-            <tr><td {lb}>CST (Mexico)</td><td {tm}>{cdt_mexico}</td><td {sp}></td><td {lb}>PST (LA)</td><td {tm}>{pst_time}</td></tr>
-        </table>
+    <div id="last-updated-wrap" data-utc="{utc_iso}" style="margin-top:24px; display:flex; flex-direction:column; align-items:center;">
+        <canvas id="update-clock" width="64" height="64"></canvas>
+        <div id="update-minutes" style="font-size:12px; color:#64748b; margin-top:4px; font-variant-numeric:tabular-nums;"></div>
     </div>
     """
     return msg

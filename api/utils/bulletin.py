@@ -199,17 +199,24 @@ def append_last_updated_time(msg):
     from zoneinfo import ZoneInfo
 
     kst_time = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M")
+    cst_china = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
+    ist_time = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M")
+    cdt_mexico = datetime.now(ZoneInfo("America/Mexico_City")).strftime("%Y-%m-%d %H:%M")
+    pht_time = datetime.now(ZoneInfo("Asia/Manila")).strftime("%Y-%m-%d %H:%M")
     pst_time = datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M")
     cst_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%Y-%m-%d %H:%M")
     est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M")
     utc_iso = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     msg += f"""
-    <div id="last-updated-wrap" data-utc="{utc_iso}" style="margin-top:24px; display:flex; align-items:center; gap:10px;">
-        <canvas id="update-clock" width="28" height="28" style="flex-shrink:0; display:block;"></canvas>
+    <div id="last-updated-wrap" data-utc="{utc_iso}" style="margin-top:24px;">
         <table style="border-collapse:collapse; font-family:Arial, sans-serif;">
-            <tr><td colspan="2" style="padding:4px 0 8px 0; font-size:12px; color:#94a3b8; font-weight:600;">⌛ Last updated</td></tr>
+            <tr><td colspan="2" style="padding:4px 0 8px 0; font-size:12px; color:#94a3b8; font-weight:600;">⌛ Last updated <canvas id="update-clock" width="16" height="16" style="display:inline-block; vertical-align:middle; margin-left:4px;"></canvas></td></tr>
             <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">KST (Seoul)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{kst_time}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">CST (Beijing)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{cst_china}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">IST (Delhi)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{ist_time}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">CST (Mexico)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{cdt_mexico}</td></tr>
+            <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">PHT (Manila)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{pht_time}</td></tr>
             <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">PST (LA)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{pst_time}</td></tr>
             <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">CST (Chicago)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{cst_time}</td></tr>
             <tr><td style="padding:4px 12px 4px 0; color:#64748b; font-size:12px; white-space:nowrap;">EST (NY)</td><td class="updated-time" style="padding:4px 0; font-size:12px; font-variant-numeric:tabular-nums;">{est_time}</td></tr>

@@ -713,7 +713,7 @@
 
                 // Pie clock: shows remaining time to next update
                 if (ctx2d) {
-                    var s = 28, cx = s / 2, cy = s / 2, r2 = 10;
+                    var s = 16, cx = s / 2, cy = s / 2, r2 = 6;
                     ctx2d.clearRect(0, 0, s, s);
 
                     // Background circle
@@ -722,14 +722,14 @@
                     ctx2d.fillStyle = '#1e293b';
                     ctx2d.fill();
                     ctx2d.strokeStyle = '#334155';
-                    ctx2d.lineWidth = 1.5;
+                    ctx2d.lineWidth = 1;
                     ctx2d.stroke();
 
                     // Filled pie (elapsed portion)
                     if (ratio > 0) {
                         ctx2d.beginPath();
                         ctx2d.moveTo(cx, cy);
-                        ctx2d.arc(cx, cy, r2 - 1, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
+                        ctx2d.arc(cx, cy, r2 - 0.5, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
                         ctx2d.closePath();
                         ctx2d.fillStyle = ratio < 0.5 ? 'rgba(96,165,250,0.3)' : ratio < 0.8 ? 'rgba(96,165,250,0.5)' : 'rgba(96,165,250,0.7)';
                         ctx2d.fill();
@@ -737,7 +737,7 @@
 
                     // Center dot
                     ctx2d.beginPath();
-                    ctx2d.arc(cx, cy, 1.5, 0, Math.PI * 2);
+                    ctx2d.arc(cx, cy, 1, 0, Math.PI * 2);
                     ctx2d.fillStyle = '#64748b';
                     ctx2d.fill();
                 }

@@ -79,7 +79,8 @@ def format_table_html(table):
             row_attr = f" {odd_row_style}"
         table_html += f"<tr{row_attr}>"
         for col in row.find_all(["th", "td"]):
-            text = col.get_text(strip=True).replace('\xa0', ' ')
+            text = col.get_text(separator=' ', strip=True).replace('\xa0', ' ')
+            text = _shorten_label(text)
             if row_index == 1:
                 table_html += f"<th {header_style}>{text}</th>"
             else:
@@ -87,6 +88,31 @@ def format_table_html(table):
         table_html += "</tr>"
     table_html += "</table>"
     return table_html
+
+def _shorten_label(text):
+    replacements = {
+        "All Chargeability Areas Except Those Listed": "All Other",
+        "CHINA- mainland born": "China",
+        "CHINA-mainland born": "China",
+        "Certain Religious Workers": "Religious Workers",
+        "Employment- based": "Category",
+        "Employment-based": "Category",
+    }
+    for long, short in replacements.items():
+        if text == long:
+            return short
+    # Shorten 5th preference variants
+    if text.startswith("5th") and "(" in text:
+        # "5th Unreserved (including C5, T5...)" → "5th Unreserved"
+        # "5th Set Aside: Rural (20%...)" → "5th Rural"
+        # "5th Set Aside: High Unemployment (10%...)" → "5th High Unemp."
+        # "5th Set Aside: Infrastructure (2%...)" → "5th Infrastructure"
+        t = text.split("(")[0].strip()
+        t = t.replace("Set Aside:", "").replace("Set Aside", "").strip()
+        if "High Unemployment" in t:
+            return "5th High Unemp."
+        return t
+    return text
 
 def format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html):
     link_style = 'style="color:#2563eb; text-decoration:none;"'

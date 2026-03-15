@@ -2,7 +2,7 @@
 
 A web app that tracks the latest U.S. Department of State Visa Bulletin for employment-based (EB) visas, with email notifications when new bulletins are released.
 
-**Live site:** Hosted on [Vercel](https://vercel.com/karingzs-projects/visa-bulletin-checker)
+**Live site:** [visa-bulletin-checker.vercel.app](https://visa-bulletin-checker.vercel.app)
 
 ## Features
 
@@ -85,6 +85,32 @@ The project is configured via `vercel.json` with two serverless functions:
 | `/api/check_bulletin` | GET | Cron-triggered endpoint — checks for new bulletins and emails subscribers (requires `CRON_SECRET`) |
 
 ## How It Works
+
+```mermaid
+graph TD
+    A[GitHub Actions - Hourly] -->|GET /api/check_bulletin| V
+    C[User Browser] -->|Visit Site| V
+
+    subgraph Vercel [Vercel Serverless]
+        V[Flask App] --> S[Scrape USCIS Site]
+        S --> P[Check Bulletin Update]
+        V -->|Read cache, subscriptions,\nhistory, hit counts| N
+        V -->|Write cache, history,\nnew subscriptions| N
+    end
+
+    subgraph Neon [Neon PostgreSQL]
+        N[(Database)]
+        N --- T1[bulletin_cache]
+        T1 --- T2[subscriptions]
+        T2 --- T3[bulletin_history]
+        T3 --- T4[hit_counts]
+    end
+
+    P --> D{New Bulletin Month?}
+    D -->|Yes| G[Save to History]
+    G --> H[Email Subscribers via Gmail SMTP]
+    D -->|No| I[Serve Cached Result]
+```
 
 1. The app scrapes the State Department's Visa Bulletin index page for the latest bulletin link
 2. Parses employment-based tables to extract priority dates for all categories and countries

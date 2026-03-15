@@ -204,18 +204,15 @@ def append_last_updated_time(msg):
     est_time = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M")
     utc_iso = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    label_style = 'style="padding:3px 6px 3px 0; color:#64748b; font-size:12px; white-space:nowrap;"'
-    time_style = 'style="padding:3px 0; font-size:12px; font-variant-numeric:tabular-nums;" class="updated-time"'
-
     msg += f"""
-    <div id="last-updated-wrap" data-utc="{utc_iso}" style="margin-top:24px; display:flex; align-items:center; gap:10px;">
-        <canvas id="update-clock" width="28" height="28" style="flex-shrink:0;"></canvas>
+    <div id="last-updated-wrap" data-utc="{utc_iso}" style="margin-top:20px; display:flex; align-items:center; gap:8px;">
+        <canvas id="update-clock" width="28" height="28" style="flex-shrink:0; display:block;"></canvas>
         <table style="border-collapse:collapse; font-family:Arial, sans-serif;">
-            <tr><td colspan="2" style="padding:3px 0 6px 0; font-size:12px; color:#94a3b8; font-weight:600;">⌛ Last updated</td></tr>
-            <tr><td {label_style}>KST</td><td {time_style}>{kst_time}</td></tr>
-            <tr><td {label_style}>PST</td><td {time_style}>{pst_time}</td></tr>
-            <tr><td {label_style}>CST</td><td {time_style}>{cst_time}</td></tr>
-            <tr><td {label_style}>EST</td><td {time_style}>{est_time}</td></tr>
+            <tr><td colspan="2" style="padding:2px 0 4px 0; font-size:12px; color:#94a3b8; font-weight:600;">⌛ Last updated</td></tr>
+            <tr><td style="padding:2px 4px 2px 0; color:#64748b; font-size:11px; white-space:nowrap;">KST</td><td class="updated-time" style="padding:2px 0; font-size:11px; font-variant-numeric:tabular-nums;">{kst_time}</td></tr>
+            <tr><td style="padding:2px 4px 2px 0; color:#64748b; font-size:11px; white-space:nowrap;">PST</td><td class="updated-time" style="padding:2px 0; font-size:11px; font-variant-numeric:tabular-nums;">{pst_time}</td></tr>
+            <tr><td style="padding:2px 4px 2px 0; color:#64748b; font-size:11px; white-space:nowrap;">CST</td><td class="updated-time" style="padding:2px 0; font-size:11px; font-variant-numeric:tabular-nums;">{cst_time}</td></tr>
+            <tr><td style="padding:2px 4px 2px 0; color:#64748b; font-size:11px; white-space:nowrap;">EST</td><td class="updated-time" style="padding:2px 0; font-size:11px; font-variant-numeric:tabular-nums;">{est_time}</td></tr>
         </table>
     </div>
     """

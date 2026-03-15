@@ -72,7 +72,7 @@ def format_table_html(table):
         if row_index == 1:
             row_attr = ""
         elif row_index == 3:
-            row_attr = f" {highlight_row_style}"
+            row_attr = f' class="eb2-row" {highlight_row_style}'
         elif row_index % 2 == 0:
             row_attr = f" {even_row_style}"
         else:
@@ -101,17 +101,16 @@ def _shorten_label(text):
     for long, short in replacements.items():
         if text == long:
             return short
-    # Shorten 5th preference variants
-    if text.startswith("5th") and "(" in text:
-        # "5th Unreserved (including C5, T5...)" → "5th Unreserved"
-        # "5th Set Aside: Rural (20%...)" → "5th Rural"
-        # "5th Set Aside: High Unemployment (10%...)" → "5th High Unemp."
-        # "5th Set Aside: Infrastructure (2%...)" → "5th Infrastructure"
-        t = text.split("(")[0].strip()
-        t = t.replace("Set Aside:", "").replace("Set Aside", "").strip()
-        if "High Unemployment" in t:
+    # Shorten 5th preference variants — keywords may be inside or outside parens
+    if text.startswith("5th"):
+        if "High Unemployment" in text:
             return "5th High Unemp."
-        return t
+        if "Infrastructure" in text:
+            return "5th Infrastructure"
+        if "Rural" in text:
+            return "5th Rural"
+        if "Unreserved" in text:
+            return "5th Unreserved"
     return text
 
 def format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html):

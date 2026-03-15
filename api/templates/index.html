@@ -156,7 +156,7 @@
         .bulletin-content h2 {
             font-size: 22px;
             font-weight: 700;
-            color: #f1f5f9;
+            color: #f1f5f9 !important;
             letter-spacing: -0.02em;
         }
         .bulletin-content h3 {
@@ -171,14 +171,14 @@
             margin-top: 20px !important;
         }
         .bulletin-content p {
-            color: #cbd5e1;
+            color: #cbd5e1 !important;
         }
         .bulletin-content a {
-            color: #60a5fa;
+            color: #60a5fa !important;
             text-decoration: none;
             font-weight: 500;
         }
-        .bulletin-content a:hover { text-decoration: underline; color: #93bbfc; }
+        .bulletin-content a:hover { text-decoration: underline; color: #93bbfc !important; }
         .bulletin-content a:focus-visible {
             outline: 2px solid #465fff;
             outline-offset: 2px;
@@ -230,6 +230,22 @@
             background: transparent !important;
             font-weight: 400 !important;
             color: #64748b !important;
+        }
+
+        /* ── EB-2 Neon Breathing Effect ── */
+        @keyframes neonBreathe {
+            0%, 100% { box-shadow: inset 0 0 4px rgba(96,165,250,0.3), 0 0 6px rgba(96,165,250,0.15); }
+            50% { box-shadow: inset 0 0 8px rgba(96,165,250,0.5), 0 0 14px rgba(96,165,250,0.3); }
+        }
+        .bulletin-content .eb2-row td:nth-child(1),
+        .bulletin-content .eb2-row td:nth-child(2) {
+            position: relative;
+            outline: 1.5px solid rgba(96,165,250,0.5);
+            outline-offset: -1.5px;
+            border-radius: 4px;
+            animation: neonBreathe 2.5s ease-in-out infinite;
+            color: #93c5fd !important;
+            font-weight: 600 !important;
         }
 
         /* ── Subscribe Card ── */

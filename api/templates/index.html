@@ -245,20 +245,13 @@
             color: #93c5fd !important;
             font-weight: 600 !important;
         }
-        .bulletin-content .eb2-row td:nth-child(1) {
-            position: relative;
-        }
-        .bulletin-content .eb2-row td:nth-child(1)::after {
-            content: '';
+        .neon-overlay {
             position: absolute;
-            top: 2px;
-            left: 2px;
-            width: calc(200% + 1px);
-            height: calc(100% - 4px);
             border: 1.5px solid rgba(96,165,250,0.5);
             border-radius: 6px;
             animation: neonBreathe 2.5s ease-in-out infinite;
             pointer-events: none;
+            z-index: 1;
         }
 
         /* ── Subscribe Card ── */
@@ -487,6 +480,30 @@
             var button = document.getElementById('submit-button');
             button.textContent = checkbox.checked ? 'Unsubscribe' : 'Subscribe';
         }
+
+        function positionNeonOverlays() {
+            document.querySelectorAll('.neon-overlay').forEach(function(el) { el.remove(); });
+            document.querySelectorAll('.bulletin-content .eb2-row').forEach(function(row) {
+                var td1 = row.querySelector('td:nth-child(1)');
+                var td2 = row.querySelector('td:nth-child(2)');
+                if (!td1 || !td2) return;
+                var table = row.closest('table');
+                if (!table) return;
+                table.style.position = 'relative';
+                var tableRect = table.getBoundingClientRect();
+                var r1 = td1.getBoundingClientRect();
+                var r2 = td2.getBoundingClientRect();
+                var overlay = document.createElement('div');
+                overlay.className = 'neon-overlay';
+                overlay.style.top = (r1.top - tableRect.top + 2) + 'px';
+                overlay.style.left = (r1.left - tableRect.left + 2) + 'px';
+                overlay.style.width = (r2.right - r1.left - 4) + 'px';
+                overlay.style.height = (r1.height - 4) + 'px';
+                table.appendChild(overlay);
+            });
+        }
+        window.addEventListener('load', positionNeonOverlays);
+        window.addEventListener('resize', positionNeonOverlays);
     </script>
 </body>
 </html>

@@ -48,6 +48,7 @@ def extract_target_tables(soup):
         raise ValueError("Could not find the target tables in the bulletin page.")
     return tables
 
+CATEGORIES = ['1st', '2nd', '3rd']
 COUNTRY_COLUMNS = {
     'all_other': 1,
     'china': 2,
@@ -56,39 +57,55 @@ COUNTRY_COLUMNS = {
     'philippines': 5,
 }
 
-def extract_eb2_all_countries(soup):
-    """Extract EB-2 priority dates for all countries from a bulletin page.
-    Returns dict: {country: {'fad': str, 'filing': str|None}} or None."""
+def extract_employment_data(soup):
+    """Extract employment data for all categories and countries.
+    Returns list of {category, country, fad, filing} or None."""
     try:
         tables = extract_target_tables(soup)
     except ValueError:
         return None
 
-    def _get_eb2_row_values(table):
+    def _get_all_category_values(table):
+        results = {}
         for row in table.select("tr"):
             cells = row.find_all(["th", "td"])
             if not cells:
                 continue
             first_cell = cells[0].get_text(strip=True).replace('\xa0', ' ')
-            if "2nd" in first_cell:
-                result = {}
-                for country, idx in COUNTRY_COLUMNS.items():
-                    if idx < len(cells):
-                        result[country] = cells[idx].get_text(strip=True).replace('\xa0', ' ')
-                return result
-        return {}
+            cat = None
+            for c in CATEGORIES:
+                if c in first_cell:
+                    cat = c
+                    break
+            if not cat:
+                continue
+            results[cat] = {}
+            for country, idx in COUNTRY_COLUMNS.items():
+                if idx < len(cells):
+                    results[cat][country] = cells[idx].get_text(strip=True).replace('\xa0', ' ')
+        return results
 
-    fad_vals = _get_eb2_row_values(tables[0]) if tables else {}
-    filing_vals = _get_eb2_row_values(tables[1]) if len(tables) > 1 else {}
-    return {c: {'fad': fad_vals.get(c), 'filing': filing_vals.get(c)} for c in COUNTRY_COLUMNS}
+    fad_data = _get_all_category_values(tables[0]) if tables else {}
+    filing_data = _get_all_category_values(tables[1]) if len(tables) > 1 else {}
+
+    records = []
+    for cat in CATEGORIES:
+        for country in COUNTRY_COLUMNS:
+            fad = fad_data.get(cat, {}).get(country)
+            filing = filing_data.get(cat, {}).get(country)
+            if fad is not None:
+                records.append({'category': cat, 'country': country, 'fad': fad, 'filing': filing})
+    return records if records else None
 
 def extract_eb2_all_other(soup):
-    """Extract EB-2 'All Other' priority dates. Backward-compatible wrapper."""
-    countries = extract_eb2_all_countries(soup)
-    if not countries:
+    """Backward-compatible wrapper for EB-2 All Other."""
+    records = extract_employment_data(soup)
+    if not records:
         return None, None
-    ao = countries.get('all_other', {})
-    return ao.get('fad'), ao.get('filing')
+    for r in records:
+        if r['category'] == '2nd' and r['country'] == 'all_other':
+            return r['fad'], r['filing']
+    return None, None
 
 # Formatting Functions
 def format_table_html(table):
@@ -223,8 +240,8 @@ def run_check(return_month=False, return_eb2=False):
         msg = append_last_updated_time(msg)
 
         if return_month and return_eb2:
-            countries = extract_eb2_all_countries(bulletin_soup)
-            return msg, f"{bulletin_year}-{bulletin_month}", countries, matched_link
+            records = extract_employment_data(bulletin_soup)
+            return msg, f"{bulletin_year}-{bulletin_month}", records, matched_link
         if return_month:
             return msg, f"{bulletin_year}-{bulletin_month}"
         return msg

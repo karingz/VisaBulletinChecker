@@ -490,10 +490,18 @@
 
         <main>
             <div class="card bulletin-content">
-                <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                <div style="display:flex; justify-content:flex-end; margin-bottom:12px; gap:16px; flex-wrap:wrap;">
+                    <div class="country-selector">
+                        <label for="category-select">Category</label>
+                        <select id="category-select" onchange="onFilterChange()">
+                            <option value="1st"{{ ' selected' if current_category == '1st' }}>EB-1</option>
+                            <option value="2nd"{{ ' selected' if current_category == '2nd' }}>EB-2</option>
+                            <option value="3rd"{{ ' selected' if current_category == '3rd' }}>EB-3</option>
+                        </select>
+                    </div>
                     <div class="country-selector">
                         <label for="country-select">Country</label>
-                        <select id="country-select" onchange="onCountryChange(this.value)">
+                        <select id="country-select" onchange="onFilterChange()">
                             <option value="all_other"{{ ' selected' if current_country == 'all_other' }}>All Other</option>
                             <option value="china"{{ ' selected' if current_country == 'china' }}>China</option>
                             <option value="india"{{ ' selected' if current_country == 'india' }}>India</option>
@@ -556,24 +564,49 @@
     </footer>
 
     <script>
-        // Country selector: persist via localStorage, sync with URL
-        function onCountryChange(value) {
-            localStorage.setItem('vbc_country', value);
+        // Filter: persist category + country via localStorage, sync with URL
+        function onFilterChange() {
+            var cat = document.getElementById('category-select').value;
+            var country = document.getElementById('country-select').value;
+            localStorage.setItem('vbc_category', cat);
+            localStorage.setItem('vbc_country', country);
             var url = new URL(window.location.href);
-            if (value === 'all_other') { url.searchParams.delete('country'); }
-            else { url.searchParams.set('country', value); }
+            if (cat === '2nd') url.searchParams.delete('category');
+            else url.searchParams.set('category', cat);
+            if (country === 'all_other') url.searchParams.delete('country');
+            else url.searchParams.set('country', country);
             window.location.href = url.toString();
         }
         (function() {
             var url = new URL(window.location.href);
-            var urlCountry = url.searchParams.get('country');
-            var stored = localStorage.getItem('vbc_country') || 'all_other';
-            if (!urlCountry && stored !== 'all_other') {
-                url.searchParams.set('country', stored);
-                window.location.replace(url.toString());
-                return;
+            var needsRedirect = false;
+            var storedCat = localStorage.getItem('vbc_category') || '2nd';
+            var storedCountry = localStorage.getItem('vbc_country') || 'all_other';
+            if (!url.searchParams.get('category') && storedCat !== '2nd') {
+                url.searchParams.set('category', storedCat); needsRedirect = true;
             }
-            if (urlCountry) localStorage.setItem('vbc_country', urlCountry);
+            if (!url.searchParams.get('country') && storedCountry !== 'all_other') {
+                url.searchParams.set('country', storedCountry); needsRedirect = true;
+            }
+            if (needsRedirect) { window.location.replace(url.toString()); return; }
+            if (url.searchParams.get('category')) localStorage.setItem('vbc_category', url.searchParams.get('category'));
+            if (url.searchParams.get('country')) localStorage.setItem('vbc_country', url.searchParams.get('country'));
+        })();
+
+        // Dynamic category row highlight
+        (function() {
+            var selectedCat = '{{ current_category }}';
+            document.querySelectorAll('.bulletin-content table').forEach(function(table) {
+                var rows = table.querySelectorAll('tr');
+                if (rows.length < 3) return;
+                rows.forEach(function(row) { row.classList.remove('eb2-row'); });
+                rows.forEach(function(row) {
+                    var cell = row.querySelector('td');
+                    if (!cell) return;
+                    var text = cell.textContent.trim();
+                    if (text.indexOf(selectedCat) === 0) row.classList.add('eb2-row');
+                });
+            });
         })();
 
         // Reorder bulletin table columns: move selected country to position 2

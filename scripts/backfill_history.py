@@ -41,8 +41,10 @@ COUNTRY_COLUMNS = {
     'philippines': 5,
 }
 
-def extract_eb2_all_countries(soup):
-    """Extract EB-2 priority dates for all countries from a bulletin page."""
+CATEGORIES = ['1st', '2nd', '3rd']
+
+def extract_eb2_all_categories(soup):
+    """Extract employment data for all categories and countries."""
     tables = []
     for bold in soup.find_all("b"):
         text = bold.get_text()
@@ -54,23 +56,37 @@ def extract_eb2_all_countries(soup):
     if not tables:
         return None
 
-    def _get_eb2_row_values(table):
+    def _get_all_values(table):
+        results = {}
         for row in table.select("tr"):
             cells = row.find_all(["th", "td"])
             if not cells:
                 continue
             first_cell = cells[0].get_text(strip=True).replace('\xa0', ' ')
-            if "2nd" in first_cell:
-                result = {}
-                for country, idx in COUNTRY_COLUMNS.items():
-                    if idx < len(cells):
-                        result[country] = cells[idx].get_text(strip=True).replace('\xa0', ' ')
-                return result
-        return {}
+            cat = None
+            for c in CATEGORIES:
+                if c in first_cell:
+                    cat = c
+                    break
+            if not cat:
+                continue
+            results[cat] = {}
+            for country, idx in COUNTRY_COLUMNS.items():
+                if idx < len(cells):
+                    results[cat][country] = cells[idx].get_text(strip=True).replace('\xa0', ' ')
+        return results
 
-    fad_vals = _get_eb2_row_values(tables[0])
-    filing_vals = _get_eb2_row_values(tables[1]) if len(tables) > 1 else {}
-    return {c: {'fad': fad_vals.get(c), 'filing': filing_vals.get(c)} for c in COUNTRY_COLUMNS}
+    fad_data = _get_all_values(tables[0])
+    filing_data = _get_all_values(tables[1]) if len(tables) > 1 else {}
+
+    records = []
+    for cat in CATEGORIES:
+        for country in COUNTRY_COLUMNS:
+            fad = fad_data.get(cat, {}).get(country)
+            filing = filing_data.get(cat, {}).get(country)
+            if fad is not None:
+                records.append({'category': cat, 'country': country, 'fad': fad, 'filing': filing})
+    return records if records else None
 
 
 def find_all_bulletin_links():
@@ -181,44 +197,29 @@ def main():
             resp = requests.get(url, timeout=30)
             resp.raise_for_status()
             soup = BeautifulSoup(resp.content, "html.parser")
-            countries = extract_eb2_all_countries(soup)
+            records = extract_eb2_all_categories(soup)
 
-            if countries is None:
+            if records is None:
                 print(f"  SKIP (no EB-2 data): {month} — {url}")
                 skipped += 1
                 continue
 
-            ao = countries.get('all_other', {})
-            ch = countries.get('china', {})
-            ind = countries.get('india', {})
-            mx = countries.get('mexico', {})
-            ph = countries.get('philippines', {})
-
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    INSERT INTO bulletin_history (
-                        bulletin_month, final_action_date, filing_date, source_url,
-                        fad_china, filing_china, fad_india, filing_india,
-                        fad_mexico, filing_mexico, fad_philippines, filing_philippines
-                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    ON CONFLICT (bulletin_month) DO UPDATE SET
-                        final_action_date = EXCLUDED.final_action_date,
-                        filing_date = EXCLUDED.filing_date,
-                        fad_china = EXCLUDED.fad_china, filing_china = EXCLUDED.filing_china,
-                        fad_india = EXCLUDED.fad_india, filing_india = EXCLUDED.filing_india,
-                        fad_mexico = EXCLUDED.fad_mexico, filing_mexico = EXCLUDED.filing_mexico,
-                        fad_philippines = EXCLUDED.fad_philippines, filing_philippines = EXCLUDED.filing_philippines
-                    """,
-                    (month, ao.get('fad'), ao.get('filing'), url,
-                     ch.get('fad'), ch.get('filing'),
-                     ind.get('fad'), ind.get('filing'),
-                     mx.get('fad'), mx.get('filing'),
-                     ph.get('fad'), ph.get('filing')),
-                )
+            for r in records:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO bulletin_history (bulletin_month, category, country, final_action_date, filing_date, source_url)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (bulletin_month, category, country) DO UPDATE SET
+                            final_action_date = EXCLUDED.final_action_date,
+                            filing_date = EXCLUDED.filing_date,
+                            source_url = EXCLUDED.source_url
+                        """,
+                        (month, r['category'], r['country'], r.get('fad'), r.get('filing'), url),
+                    )
             conn.commit()
             inserted += 1
-            print(f"  OK: {month} — FAD={ao.get('fad')}")
+            print(f"  OK: {month} — {len(records)} records")
         except Exception as e:
             errors += 1
             print(f"  ERROR: {month} — {e}")

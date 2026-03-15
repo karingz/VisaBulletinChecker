@@ -3,13 +3,15 @@ from flask import Flask, request, render_template
 from datetime import datetime
 
 from api.utils.bulletin import run_check
-from api.utils.db import get_cached_bulletin, save_cached_bulletin, get_bulletin_history, get_latest_history, COUNTRY_DB_COLUMNS
+from api.utils.db import get_cached_bulletin, save_cached_bulletin, get_bulletin_history, get_latest_history
 from api.utils.hits import update_hit_counts
 from api.utils.subscription import handle_subscription, get_subscriber_count, unsubscribe_email
 from api.utils.email import is_valid_email
 
 app = Flask(__name__)
 
+VALID_CATEGORIES = ['1st', '2nd', '3rd']
+CATEGORY_LABELS = {'1st': 'EB-1', '2nd': 'EB-2', '3rd': 'EB-3'}
 COUNTRY_LABELS = {
     'all_other': 'All Other',
     'china': 'China',
@@ -50,15 +52,18 @@ def check_bulletin():
             else:
                 subs_msg = "<p>❌ Invalid email address provided.</p>"
 
-    # Country selection
+    # Category + country selection
+    category = request.args.get('category', '2nd')
     country = request.args.get('country', 'all_other')
-    if country not in COUNTRY_DB_COLUMNS:
+    if category not in VALID_CATEGORIES:
+        category = '2nd'
+    if country not in COUNTRY_LABELS:
         country = 'all_other'
 
-    # Compute EB-2 change from previous bulletin
+    # Compute change from previous bulletin
     fad_diff_html = ''
     filing_diff_html = ''
-    latest = get_latest_history(2, country=country)
+    latest = get_latest_history(2, category=category, country=country)
     if len(latest) >= 2:
         curr, prev = latest[0], latest[1]
         fad_diff_html = compute_diff_html(
@@ -80,6 +85,8 @@ def check_bulletin():
         subs_msg=subs_msg,
         fad_diff=json.dumps(fad_diff_html),
         filing_diff=json.dumps(filing_diff_html),
+        current_category=category,
+        category_label=CATEGORY_LABELS[category],
         current_country=country,
         country_label=COUNTRY_LABELS[country],
     )
@@ -146,11 +153,14 @@ def compute_diff_html(current_str, previous_str, current_month=None, previous_mo
 
 @app.route("/history")
 def history():
+    category = request.args.get('category', '2nd')
     country = request.args.get('country', 'all_other')
-    if country not in COUNTRY_DB_COLUMNS:
+    if category not in VALID_CATEGORIES:
+        category = '2nd'
+    if country not in COUNTRY_LABELS:
         country = 'all_other'
 
-    rows = get_bulletin_history(country=country)
+    rows = get_bulletin_history(category=category, country=country)
     history_data = []
     for i, row in enumerate(rows):
         entry = {
@@ -221,6 +231,8 @@ def history():
         chart_fad=json.dumps(chart_fad),
         chart_filing=json.dumps(chart_filing),
         entry_count=len(rows),
+        current_category=category,
+        category_label=CATEGORY_LABELS[category],
         current_country=country,
         country_label=COUNTRY_LABELS[country],
     )

@@ -282,7 +282,7 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">Priority Date Timeline</div>
-                    <div class="card-subtitle">EB-2 "All Other" priority date movement over time</div>
+                    <div class="card-subtitle">EB-2 "All Other" — days behind current (0 = Current)</div>
                 </div>
                 <div class="range-buttons">
                     <button class="range-btn active" onclick="setRange('all', this)">All</button>
@@ -302,6 +302,10 @@
                 <div class="legend-item">
                     <div class="legend-dot" style="background:#4ade80;"></div>
                     Date for Filing
+                </div>
+                <div class="legend-item">
+                    <div style="width:16px; border-bottom:2px dashed rgba(148,163,184,0.5);"></div>
+                    Current
                 </div>
             </div>
         </div>
@@ -361,8 +365,8 @@
                         label: 'Final Action Date',
                         data: fadData,
                         borderColor: '#60a5fa',
-                        backgroundColor: 'rgba(96,165,250,0.08)',
-                        fill: true,
+                        backgroundColor: 'rgba(96,165,250,0.06)',
+                        fill: 'origin',
                         tension: 0.15,
                         pointRadius: 1.5,
                         pointHoverRadius: 5,
@@ -372,8 +376,8 @@
                         label: 'Date for Filing',
                         data: filingData,
                         borderColor: '#4ade80',
-                        backgroundColor: 'rgba(74,222,128,0.08)',
-                        fill: true,
+                        backgroundColor: 'rgba(74,222,128,0.06)',
+                        fill: 'origin',
                         tension: 0.15,
                         pointRadius: 1.5,
                         pointHoverRadius: 5,
@@ -406,8 +410,10 @@
                                 return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                             },
                             label: function(item) {
-                                var d = new Date(item.parsed.y);
-                                return item.dataset.label + ': ' + d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                                if (item.parsed.y === null || item.parsed.y === undefined) return null;
+                                var days = item.parsed.y;
+                                if (days === 0) return item.dataset.label + ': C';
+                                return item.dataset.label + ': ' + days.toLocaleString() + 'd';
                             }
                         }
                     }
@@ -424,14 +430,26 @@
                         title: { display: true, text: 'Bulletin Month', color: '#64748b', font: { family: 'Inter', size: 12 } }
                     },
                     y: {
-                        type: 'time',
-                        time: {
-                            unit: 'year',
-                            displayFormats: { year: 'yyyy', month: 'MMM yyyy' }
+                        type: 'linear',
+                        suggestedMax: 0,
+                        grid: {
+                            color: function(context) {
+                                return context.tick.value === 0 ? 'rgba(148,163,184,0.6)' : 'rgba(51,65,85,0.4)';
+                            },
+                            lineWidth: function(context) {
+                                return context.tick.value === 0 ? 2 : 1;
+                            },
+                            drawBorder: false
                         },
-                        grid: { color: 'rgba(51,65,85,0.4)', drawBorder: false },
-                        ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } },
-                        title: { display: true, text: 'Priority Date', color: '#64748b', font: { family: 'Inter', size: 12 } }
+                        ticks: {
+                            color: '#64748b',
+                            font: { family: 'Inter', size: 11 },
+                            callback: function(value) {
+                                if (value === 0) return 'C';
+                                return value.toLocaleString() + 'd';
+                            }
+                        },
+                        title: { display: true, text: 'Days from Current', color: '#64748b', font: { family: 'Inter', size: 12 } }
                     }
                 }
             }

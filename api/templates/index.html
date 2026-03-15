@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#1e293b">
     <title>Visa Bulletin Checker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,16 +15,19 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8f9fb;
-            color: #0f172a;
+            background: #111827;
+            color: #e2e8f0;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            cursor: default;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         /* ── Topbar ── */
         .topbar {
-            background: #fff;
-            border-bottom: 1px solid #e8ecf1;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
             padding: 0 24px;
             height: 56px;
             display: flex;
@@ -34,7 +37,7 @@
             top: 0;
             z-index: 10;
             backdrop-filter: blur(12px);
-            background: rgba(255,255,255,0.85);
+            background: rgba(30,41,59,0.9);
         }
         .topbar-brand {
             display: flex;
@@ -42,7 +45,7 @@
             gap: 10px;
             font-weight: 700;
             font-size: 15px;
-            color: #0f172a;
+            color: #f1f5f9;
             letter-spacing: -0.02em;
         }
         .topbar-brand svg {
@@ -54,11 +57,11 @@
         }
         .topbar-links a {
             font-size: 13px;
-            color: #64748b;
+            color: #94a3b8;
             text-decoration: none;
             transition: color 0.15s;
         }
-        .topbar-links a:hover { color: #0f172a; }
+        .topbar-links a:hover { color: #f1f5f9; }
         .topbar-links a:focus-visible {
             outline: 2px solid #465fff;
             outline-offset: 2px;
@@ -78,13 +81,13 @@
         .page-title h1 {
             font-size: 26px;
             font-weight: 700;
-            color: #0f172a;
+            color: #f1f5f9;
             letter-spacing: -0.03em;
             line-height: 1.2;
         }
         .page-title p {
             font-size: 14px;
-            color: #64748b;
+            color: #94a3b8;
             margin-top: 6px;
         }
 
@@ -96,15 +99,15 @@
             margin-bottom: 28px;
         }
         .stat-card {
-            background: #fff;
-            border: 1px solid #e8ecf1;
+            background: #1e293b;
+            border: 1px solid #334155;
             border-radius: 14px;
             padding: 20px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
         .stat-card:hover {
-            border-color: #c7d2fe;
-            box-shadow: 0 4px 16px rgba(70,95,255,0.06);
+            border-color: #465fff;
+            box-shadow: 0 4px 16px rgba(70,95,255,0.12);
         }
         .stat-icon {
             width: 36px;
@@ -116,20 +119,20 @@
             font-size: 14px;
             margin-bottom: 14px;
         }
-        .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
-        .stat-icon.purple { background: #f5f3ff; color: #8b5cf6; }
-        .stat-icon.emerald { background: #ecfdf5; color: #10b981; }
-        .stat-icon.amber { background: #fffbeb; color: #f59e0b; }
+        .stat-icon.blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .stat-icon.purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .stat-icon.emerald { background: rgba(16,185,129,0.15); color: #34d399; }
+        .stat-icon.amber { background: rgba(245,158,11,0.15); color: #fbbf24; }
         .stat-label {
             font-size: 12px;
             font-weight: 500;
-            color: #94a3b8;
+            color: #64748b;
             margin-bottom: 4px;
         }
         .stat-value {
             font-size: 28px;
             font-weight: 700;
-            color: #0f172a;
+            color: #f1f5f9;
             letter-spacing: -0.02em;
             font-variant-numeric: tabular-nums;
             line-height: 1;
@@ -142,8 +145,8 @@
 
         /* ── Card ── */
         .card {
-            background: #fff;
-            border: 1px solid #e8ecf1;
+            background: #1e293b;
+            border: 1px solid #334155;
             border-radius: 16px;
             padding: 28px;
             margin-bottom: 20px;
@@ -153,13 +156,13 @@
         .bulletin-content h2 {
             font-size: 22px;
             font-weight: 700;
-            color: #0f172a;
+            color: #f1f5f9;
             letter-spacing: -0.02em;
         }
         .bulletin-content h3 {
             font-size: 13px !important;
             font-weight: 600 !important;
-            color: #64748b !important;
+            color: #94a3b8 !important;
             text-transform: uppercase;
             letter-spacing: 0.06em !important;
             margin: 28px 0 14px !important;
@@ -168,28 +171,28 @@
             margin-top: 20px !important;
         }
         .bulletin-content p {
-            color: #475569;
+            color: #cbd5e1;
         }
         .bulletin-content a {
-            color: #465fff;
+            color: #60a5fa;
             text-decoration: none;
             font-weight: 500;
         }
-        .bulletin-content a:hover { text-decoration: underline; }
+        .bulletin-content a:hover { text-decoration: underline; color: #93bbfc; }
         .bulletin-content a:focus-visible {
             outline: 2px solid #465fff;
             outline-offset: 2px;
             border-radius: 3px;
         }
         .bulletin-content table {
-            border: 1px solid #e8ecf1 !important;
+            border: 1px solid #334155 !important;
             border-radius: 12px !important;
             overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            box-shadow: none;
         }
         .bulletin-content th {
             background: #0f172a !important;
-            color: #fff !important;
+            color: #e2e8f0 !important;
             font-size: 12px !important;
             font-weight: 600 !important;
             text-transform: uppercase;
@@ -199,11 +202,14 @@
         .bulletin-content td {
             font-size: 13px !important;
             padding: 11px 14px !important;
-            border-color: #f1f5f9 !important;
-            color: #334155 !important;
+            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+            background: #1e293b !important;
         }
         .bulletin-content tr:hover td {
-            background: #f8fafc !important;
+            background: #2d3a4f !important;
+            font-weight: 700 !important;
+            color: #f1f5f9 !important;
         }
 
         /* Last updated table */
@@ -216,11 +222,14 @@
             border: none !important;
             padding: 3px 12px 3px 0 !important;
             font-size: 12px !important;
-            color: #94a3b8 !important;
+            color: #64748b !important;
             background: transparent !important;
+            font-weight: 400 !important;
         }
         .bulletin-content > table:last-of-type tr:hover td {
             background: transparent !important;
+            font-weight: 400 !important;
+            color: #64748b !important;
         }
 
         /* ── Subscribe Card ── */
@@ -239,12 +248,12 @@
         .subscribe-title {
             font-size: 16px;
             font-weight: 700;
-            color: #0f172a;
+            color: #f1f5f9;
             margin-bottom: 6px;
         }
         .subscribe-desc {
             font-size: 13px;
-            color: #64748b;
+            color: #94a3b8;
             margin-bottom: 20px;
         }
         .form-row {
@@ -254,30 +263,32 @@
             flex-wrap: wrap;
         }
         input[type="email"] {
+            -webkit-user-select: text;
+            user-select: text;
             flex: 1;
             min-width: 240px;
             padding: 11px 16px;
-            background: #f8f9fb;
-            border: 1px solid #e2e8f0;
+            background: #0f172a;
+            border: 1px solid #334155;
             border-radius: 10px;
             font-family: inherit;
             font-size: 14px;
-            color: #0f172a;
+            color: #e2e8f0;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input[type="email"]::placeholder { color: #94a3b8; }
+        input[type="email"]::placeholder { color: #64748b; }
         input[type="email"]:focus-visible {
             outline: none;
             border-color: #465fff;
-            box-shadow: 0 0 0 3px rgba(70,95,255,0.12);
-            background: #fff;
+            box-shadow: 0 0 0 3px rgba(70,95,255,0.2);
+            background: #0f172a;
         }
         .checkbox-label {
             display: flex;
             align-items: center;
             gap: 7px;
             font-size: 13px;
-            color: #64748b;
+            color: #94a3b8;
             cursor: pointer;
             white-space: nowrap;
             user-select: none;
@@ -289,6 +300,7 @@
             height: 15px;
         }
         .btn-submit {
+            min-width: 130px;
             padding: 11px 28px;
             border: none;
             border-radius: 10px;
@@ -318,9 +330,9 @@
             margin: 0;
             padding: 12px 16px;
             border-radius: 10px;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.25);
+            color: #4ade80;
             font-weight: 500;
         }
 
@@ -328,15 +340,16 @@
         footer {
             text-align: center;
             padding: 32px 24px 48px;
+            border-top: 1px solid #1e293b;
         }
         footer a {
             font-size: 13px;
-            color: #94a3b8;
+            color: #64748b;
             text-decoration: none;
             margin: 0 16px;
             transition: color 0.15s;
         }
-        footer a:hover { color: #475569; }
+        footer a:hover { color: #e2e8f0; }
         footer a:focus-visible {
             outline: 2px solid #465fff;
             outline-offset: 2px;

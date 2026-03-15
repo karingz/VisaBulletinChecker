@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request
 from api.utils.bulletin import run_check
-from api.utils.db import get_cached_bulletin, save_cached_bulletin
+from api.utils.db import get_cached_bulletin, save_cached_bulletin, save_bulletin_history
 from api.utils.subscription import load_subscriptions, save_subscriptions
 from api.utils.email import send_email
 
@@ -19,12 +19,22 @@ def check_bulletin():
     cached_month = cache["bulletin_month"] if cache else None
 
     # Scrape fresh
-    result, bulletin_month = run_check(return_month=True)
+    result, bulletin_month, eb2_fad, eb2_filing, bulletin_url = run_check(return_month=True, return_eb2=True)
     if not bulletin_month:
         return {"statusCode": 200, "body": {"error": "Failed to fetch bulletin"}}
 
     # Update cache
     save_cached_bulletin(result, bulletin_month)
+
+    # Save EB-2 history
+    if eb2_fad is not None and bulletin_month:
+        try:
+            from datetime import datetime as dt
+            parts = bulletin_month.split("-")
+            bm_date = dt.strptime(f"{parts[1]} {parts[0]}", "%B %Y").date()
+            save_bulletin_history(bm_date, eb2_fad, eb2_filing, bulletin_url)
+        except Exception:
+            pass
 
     # Only send emails if the bulletin month has changed from the cache
     if cached_month == bulletin_month:

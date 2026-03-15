@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e293b">
+    <title>EB-2 History — Visa Bulletin Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #111827;
+            color: #e2e8f0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            cursor: default;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+            background: rgba(30,41,59,0.9);
+        }
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            color: #f1f5f9;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+        }
+        .topbar-brand svg { color: #465fff; }
+        .topbar-links {
+            display: flex;
+            gap: 20px;
+        }
+        .topbar-links a {
+            font-size: 13px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .topbar-links a:hover { color: #f1f5f9; }
+        .topbar-links a.active { color: #f1f5f9; }
+        .topbar-links a:focus-visible {
+            outline: 2px solid #465fff;
+            outline-offset: 2px;
+            border-radius: 3px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        /* ── Page Title ── */
+        .page-title {
+            margin-bottom: 28px;
+        }
+        .page-title h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+        }
+        .page-title p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .card-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        /* ── Range Buttons ── */
+        .range-buttons {
+            display: flex;
+            gap: 6px;
+        }
+        .range-btn {
+            padding: 6px 16px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: transparent;
+            color: #94a3b8;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .range-btn:hover {
+            border-color: #465fff;
+            color: #e2e8f0;
+        }
+        .range-btn.active {
+            background: #465fff;
+            border-color: #465fff;
+            color: #fff;
+        }
+        .range-btn:focus-visible {
+            outline: 2px solid #465fff;
+            outline-offset: 2px;
+        }
+
+        /* ── Chart ── */
+        .chart-wrap {
+            position: relative;
+            height: 420px;
+        }
+
+        /* ── Legend ── */
+        .chart-legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* ── History Table ── */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-variant-numeric: tabular-nums;
+        }
+        .history-table th {
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 12px 14px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .history-table td {
+            font-size: 13px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #1e293b;
+            color: #cbd5e1;
+            background: #162032;
+        }
+        .history-table tr:hover td {
+            background: #2d3a4f;
+            text-shadow: 0 0 0.5px currentColor, 0 0 0.5px currentColor;
+            color: #f1f5f9;
+        }
+        .history-table .col-month { white-space: nowrap; }
+        .history-table .col-date { white-space: nowrap; font-weight: 500; }
+        .history-table .col-diff { white-space: nowrap; text-align: center; min-width: 90px; }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 32px 24px 48px;
+            border-top: 1px solid #1e293b;
+        }
+        footer a {
+            font-size: 13px;
+            color: #64748b;
+            text-decoration: none;
+            margin: 0 16px;
+            transition: color 0.15s;
+        }
+        footer a:hover { color: #e2e8f0; }
+        footer a:focus-visible {
+            outline: 2px solid #465fff;
+            outline-offset: 2px;
+            border-radius: 3px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 680px) {
+            .container { padding: 20px 16px 60px; }
+            .card { padding: 20px; border-radius: 14px; }
+            .page-title h1 { font-size: 22px; }
+            .chart-wrap { height: 300px; }
+            .topbar { padding: 0 16px; }
+            .card-header { flex-direction: column; align-items: flex-start; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <a href="/" class="topbar-brand">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Visa Bulletin Checker
+        </a>
+        <div class="topbar-links">
+            <a href="/"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Bulletin</a>
+            <a href="/history" class="active"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> EB-2 History</a>
+            <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
+            <a href="mailto:imaginaryground@gmail.com">Contact</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>EB-2 Priority Date History</h1>
+            <p>All Other chargeability — tracking priority date movement across {{ entry_count }} bulletin{{ 's' if entry_count != 1 else '' }}.</p>
+        </div>
+
+        <!-- Chart -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Priority Date Timeline</div>
+                    <div class="card-subtitle">EB-2 "All Other" priority date movement over time</div>
+                </div>
+                <div class="range-buttons">
+                    <button class="range-btn active" onclick="setRange('all', this)">All</button>
+                    <button class="range-btn" onclick="setRange('5y', this)">5Y</button>
+                    <button class="range-btn" onclick="setRange('2y', this)">2Y</button>
+                    <button class="range-btn" onclick="setRange('1y', this)">1Y</button>
+                </div>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="historyChart"></canvas>
+            </div>
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background:#60a5fa;"></div>
+                    Final Action Date
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background:#4ade80;"></div>
+                    Date for Filing
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Monthly Changes</div>
+                    <div class="card-subtitle">{{ entry_count }} entries, newest first</div>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Final Action Date</th>
+                            <th>Change</th>
+                            <th>Filing Date</th>
+                            <th>Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in history %}
+                        <tr>
+                            <td class="col-month">
+                                <a href="{{ entry.source_url }}" target="_blank" style="color:#60a5fa; text-decoration:none;">{{ entry.month_label }}</a>
+                            </td>
+                            <td class="col-date">{{ entry.final_action_date }}</td>
+                            <td class="col-diff">{{ entry.fad_diff|safe }}</td>
+                            <td class="col-date">{{ entry.filing_date }}</td>
+                            <td class="col-diff">{{ entry.filing_diff|safe }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
+        <a href="mailto:imaginaryground@gmail.com">Contact</a>
+    </footer>
+
+    <script>
+        var fadData = {{ chart_fad|safe }};
+        var filingData = {{ chart_filing|safe }};
+
+        var ctx = document.getElementById('historyChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Final Action Date',
+                        data: fadData,
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96,165,250,0.08)',
+                        fill: true,
+                        tension: 0.15,
+                        pointRadius: 1.5,
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
+                    },
+                    {
+                        label: 'Date for Filing',
+                        data: filingData,
+                        borderColor: '#4ade80',
+                        backgroundColor: 'rgba(74,222,128,0.08)',
+                        fill: true,
+                        tension: 0.15,
+                        pointRadius: 1.5,
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f1f5f9',
+                        bodyColor: '#cbd5e1',
+                        borderColor: '#334155',
+                        borderWidth: 1,
+                        padding: 12,
+                        titleFont: { family: 'Inter', weight: '600' },
+                        bodyFont: { family: 'Inter' },
+                        callbacks: {
+                            title: function(items) {
+                                if (!items.length) return '';
+                                var d = new Date(items[0].parsed.x);
+                                return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                            },
+                            label: function(item) {
+                                var d = new Date(item.parsed.y);
+                                return item.dataset.label + ': ' + d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'year',
+                            displayFormats: { year: 'yyyy', month: 'MMM yyyy' }
+                        },
+                        grid: { color: 'rgba(51,65,85,0.4)', drawBorder: false },
+                        ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } },
+                        title: { display: true, text: 'Bulletin Month', color: '#64748b', font: { family: 'Inter', size: 12 } }
+                    },
+                    y: {
+                        type: 'time',
+                        time: {
+                            unit: 'year',
+                            displayFormats: { year: 'yyyy', month: 'MMM yyyy' }
+                        },
+                        grid: { color: 'rgba(51,65,85,0.4)', drawBorder: false },
+                        ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } },
+                        title: { display: true, text: 'Priority Date', color: '#64748b', font: { family: 'Inter', size: 12 } }
+                    }
+                }
+            }
+        });
+
+        function setRange(range, btn) {
+            var min;
+            var now = new Date();
+            switch(range) {
+                case '1y': min = new Date(now.getFullYear() - 1, now.getMonth(), 1).toISOString(); break;
+                case '2y': min = new Date(now.getFullYear() - 2, now.getMonth(), 1).toISOString(); break;
+                case '5y': min = new Date(now.getFullYear() - 5, now.getMonth(), 1).toISOString(); break;
+                default: min = undefined;
+            }
+            chart.options.scales.x.min = min;
+            chart.options.scales.x.time.unit = (range === '1y' || range === '2y') ? 'month' : 'year';
+            chart.update();
+            document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -48,6 +48,28 @@ def extract_target_tables(soup):
         raise ValueError("Could not find the target tables in the bulletin page.")
     return tables
 
+def extract_eb2_all_other(soup):
+    """Extract EB-2 'All Other' priority dates from a bulletin page.
+    Returns (final_action_date, filing_date). filing_date is None for pre-2015."""
+    try:
+        tables = extract_target_tables(soup)
+    except ValueError:
+        return None, None
+
+    def _get_eb2_value(table):
+        for row in table.select("tr"):
+            cells = row.find_all(["th", "td"])
+            if not cells:
+                continue
+            first_cell = cells[0].get_text(strip=True).replace('\xa0', ' ')
+            if "2nd" in first_cell and len(cells) > 1:
+                return cells[1].get_text(strip=True).replace('\xa0', ' ')
+        return None
+
+    fad = _get_eb2_value(tables[0]) if tables else None
+    filing = _get_eb2_value(tables[1]) if len(tables) > 1 else None
+    return fad, filing
+
 # Formatting Functions
 def format_table_html(table):
     header_style = (
@@ -159,7 +181,7 @@ def append_last_updated_time(msg):
     return msg
 
 # Main Function
-def run_check(return_month=False):
+def run_check(return_month=False, return_eb2=False):
     try:
         # Step 1: Scrape the index page and find the current bulletin link
         index_soup = fetch_index_page()
@@ -180,11 +202,16 @@ def run_check(return_month=False):
         msg = format_message(matched_link, bulletin_month, bulletin_year, final_action_html, filing_dates_html)
         msg = append_last_updated_time(msg)
 
+        if return_month and return_eb2:
+            fad, filing = extract_eb2_all_other(bulletin_soup)
+            return msg, f"{bulletin_year}-{bulletin_month}", fad, filing, matched_link
         if return_month:
             return msg, f"{bulletin_year}-{bulletin_month}"
         return msg
     except Exception as e:
         error_msg = f"<p>❌ An error occurred: {str(e)}</p>"
+        if return_month and return_eb2:
+            return error_msg, "", None, None, None
         if return_month:
             return error_msg, ""
         return error_msg

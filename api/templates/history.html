@@ -275,7 +275,7 @@
             Visa Bulletin Checker
         </a>
         <div class="topbar-links">
-            <a href="/" class="nav-glow"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Bulletin</a>
+            <a href="/" class="nav-glow" style="margin-right:10px;"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Bulletin</a>
             <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
             <a href="mailto:imaginaryground@gmail.com">Contact</a>
         </div>
@@ -363,6 +363,18 @@
     </footer>
 
     <script>
+        function daysToYM(days) {
+            if (days === 0) return 'C';
+            var abs = Math.abs(days);
+            var y = Math.floor(abs / 365);
+            var m = Math.floor((abs % 365) / 30);
+            var sign = days < 0 ? '-' : '';
+            if (y && m) return sign + y + 'Y ' + m + 'M';
+            if (y) return sign + y + 'Y';
+            if (m) return sign + m + 'M';
+            return sign + abs + 'd';
+        }
+
         var fadData = {{ chart_fad|safe }};
         var filingData = {{ chart_filing|safe }};
 
@@ -421,9 +433,7 @@
                             },
                             label: function(item) {
                                 if (item.parsed.y === null || item.parsed.y === undefined) return null;
-                                var days = item.parsed.y;
-                                if (days === 0) return item.dataset.label + ': C';
-                                return item.dataset.label + ': ' + days.toLocaleString() + 'd';
+                                return item.dataset.label + ': ' + daysToYM(item.parsed.y);
                             }
                         }
                     }
@@ -454,12 +464,9 @@
                         ticks: {
                             color: '#64748b',
                             font: { family: 'Inter', size: 11 },
-                            callback: function(value) {
-                                if (value === 0) return 'C';
-                                return value.toLocaleString() + 'd';
-                            }
+                            callback: function(value) { return daysToYM(value); }
                         },
-                        title: { display: true, text: 'Days from Current', color: '#64748b', font: { family: 'Inter', size: 12 } }
+                        title: { display: true, text: 'Wait Time', color: '#64748b', font: { family: 'Inter', size: 12 } }
                     }
                 }
             }

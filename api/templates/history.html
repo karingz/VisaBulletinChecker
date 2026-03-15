@@ -63,11 +63,26 @@
             transition: color 0.15s;
         }
         .topbar-links a:hover { color: #f1f5f9; }
-        .topbar-links a.active { color: #f1f5f9; }
         .topbar-links a:focus-visible {
             outline: 2px solid #465fff;
             outline-offset: 2px;
             border-radius: 3px;
+        }
+        @keyframes navGlow {
+            0%, 100% { box-shadow: 0 0 4px rgba(96,165,250,0.3), 0 0 10px rgba(96,165,250,0.15); }
+            50% { box-shadow: 0 0 8px rgba(96,165,250,0.5), 0 0 18px rgba(96,165,250,0.25); }
+        }
+        .topbar-links .nav-glow {
+            color: #93c5fd;
+            border: 1px solid rgba(96,165,250,0.45);
+            border-radius: 8px;
+            padding: 5px 14px;
+            animation: navGlow 2.5s ease-in-out infinite;
+        }
+        .topbar-links .nav-glow:hover {
+            color: #bfdbfe;
+            border-color: rgba(96,165,250,0.7);
+            box-shadow: 0 0 10px rgba(96,165,250,0.5), 0 0 20px rgba(96,165,250,0.3);
         }
 
         .container {
@@ -264,8 +279,7 @@
             Visa Bulletin Checker
         </a>
         <div class="topbar-links">
-            <a href="/"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Bulletin</a>
-            <a href="/history" class="active"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> EB-2 History</a>
+            <a href="/" class="nav-glow"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Bulletin</a>
             <a href="https://github.com/karingz/VisaBulletinChecker" target="_blank"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
             <a href="mailto:imaginaryground@gmail.com">Contact</a>
         </div>
@@ -285,8 +299,8 @@
                     <div class="card-subtitle">EB-2 "All Other" — days behind current (0 = Current)</div>
                 </div>
                 <div class="range-buttons">
-                    <button class="range-btn active" onclick="setRange('all', this)">All</button>
-                    <button class="range-btn" onclick="setRange('5y', this)">5Y</button>
+                    <button class="range-btn" onclick="setRange('all', this)">All</button>
+                    <button class="range-btn active" onclick="setRange('3y', this)">3Y</button>
                     <button class="range-btn" onclick="setRange('2y', this)">2Y</button>
                     <button class="range-btn" onclick="setRange('1y', this)">1Y</button>
                 </div>
@@ -455,21 +469,53 @@
             }
         });
 
+        // Set default range to 3Y
+        var now = new Date();
+        chart.options.scales.x.min = new Date(now.getFullYear() - 3, now.getMonth(), 1).toISOString();
+        chart.options.scales.x.time.unit = 'month';
+        chart.update();
+
         function setRange(range, btn) {
             var min;
             var now = new Date();
             switch(range) {
                 case '1y': min = new Date(now.getFullYear() - 1, now.getMonth(), 1).toISOString(); break;
                 case '2y': min = new Date(now.getFullYear() - 2, now.getMonth(), 1).toISOString(); break;
-                case '5y': min = new Date(now.getFullYear() - 5, now.getMonth(), 1).toISOString(); break;
+                case '3y': min = new Date(now.getFullYear() - 3, now.getMonth(), 1).toISOString(); break;
                 default: min = undefined;
             }
             chart.options.scales.x.min = min;
-            chart.options.scales.x.time.unit = (range === '1y' || range === '2y') ? 'month' : 'year';
+            chart.options.scales.x.max = undefined;
+            chart.options.scales.x.time.unit = (range === '1y' || range === '2y' || range === '3y') ? 'month' : 'year';
             chart.update();
             document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
         }
+
+        // Horizontal wheel scrolling on chart
+        document.getElementById('historyChart').addEventListener('wheel', function(e) {
+            e.preventDefault();
+            var xScale = chart.scales.x;
+            var range = xScale.max - xScale.min;
+            var scrollFactor = 0.1;
+            var delta = e.deltaY > 0 ? range * scrollFactor : -range * scrollFactor;
+
+            var newMin = xScale.min + delta;
+            var newMax = xScale.max + delta;
+
+            // Clamp to data bounds
+            var dataMin = fadData.length ? new Date(fadData[0].x).getTime() : xScale.min;
+            var dataMax = fadData.length ? new Date(fadData[fadData.length - 1].x).getTime() : xScale.max;
+            if (newMin < dataMin) { newMax += dataMin - newMin; newMin = dataMin; }
+            if (newMax > dataMax) { newMin -= newMax - dataMax; newMax = dataMax; }
+
+            chart.options.scales.x.min = newMin;
+            chart.options.scales.x.max = newMax;
+            chart.update('none');
+
+            // Clear active button since we're in custom range
+            document.querySelectorAll('.range-btn').forEach(function(b) { b.classList.remove('active'); });
+        }, { passive: false });
     </script>
 </body>
 </html>

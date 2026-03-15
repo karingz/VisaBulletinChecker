@@ -119,6 +119,22 @@ def parse_priority_date(date_str):
             continue
     return None
 
+def format_days(days):
+    """Format days as Y M or d. Use d only if < 30."""
+    sign = '+' if days > 0 else ''
+    abd = abs(days)
+    if abd < 30:
+        return f'{sign}{days}d'
+    y = abd // 365
+    m = (abd % 365) // 30
+    parts = []
+    if y:
+        parts.append(f'{y}Y')
+    if m:
+        parts.append(f'{m}M')
+    result = ''.join(parts)
+    return f'{sign}{result}' if days > 0 else f'-{result}'
+
 def compute_diff_html(current_str, previous_str, current_month=None, previous_month=None):
     """Compute diff HTML between two priority date strings.
     C is resolved to the 15th of its bulletin month."""
@@ -143,9 +159,9 @@ def compute_diff_html(current_str, previous_str, current_month=None, previous_mo
         diff = (curr_date - prev_date).days
         suffix = ' (C)' if curr == 'C' else ''
         if diff > 0:
-            return f'<span style="color:#4ade80;">▲ +{diff}d{suffix}</span>'
+            return f'<span style="color:#4ade80;">▲ {format_days(diff)}{suffix}</span>'
         elif diff < 0:
-            return f'<span style="color:#f87171;">▼ {diff}d{suffix}</span>'
+            return f'<span style="color:#f87171;">▼ {format_days(diff)}{suffix}</span>'
         if suffix:
             return f'<span style="color:#64748b;">—{suffix}</span>'
         return '<span style="color:#64748b;">—</span>'

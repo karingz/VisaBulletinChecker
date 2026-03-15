@@ -56,8 +56,7 @@ def check_bulletin():
 
         if last_sent_month != bulletin_month:
             subject = f"Visa Bulletin for {bulletin_month}"
-            body = result.split("⌛ Last updated time:")[0]
-            if not send_email(email, subject, body, bulletin_month):
+            if not send_email(email, subject, result, bulletin_month):
                 failed += 1
             else:
                 save_subscriptions({"emails": [email], "last_sent_month": bulletin_month})

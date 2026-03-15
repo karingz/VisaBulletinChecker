@@ -3,6 +3,14 @@ import psycopg2
 
 DB_URL = os.getenv("DATABASE_URL")
 
+COUNTRY_DB_COLUMNS = {
+    'all_other': ('final_action_date', 'filing_date'),
+    'china': ('fad_china', 'filing_china'),
+    'india': ('fad_india', 'filing_india'),
+    'mexico': ('fad_mexico', 'filing_mexico'),
+    'philippines': ('fad_philippines', 'filing_philippines'),
+}
+
 def get_db_connection():
     return psycopg2.connect(DB_URL)
 
@@ -39,13 +47,14 @@ def save_cached_bulletin(result, bulletin_month):
     except Exception:
         pass
 
-def get_bulletin_history():
+def get_bulletin_history(country='all_other'):
+    fad_col, filing_col = COUNTRY_DB_COLUMNS.get(country, COUNTRY_DB_COLUMNS['all_other'])
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT bulletin_month, final_action_date, filing_date, source_url "
-                "FROM bulletin_history ORDER BY bulletin_month ASC"
+                f"SELECT bulletin_month, {fad_col}, {filing_col}, source_url "
+                f"FROM bulletin_history ORDER BY bulletin_month ASC"
             )
             rows = cur.fetchall()
         conn.close()
@@ -56,13 +65,14 @@ def get_bulletin_history():
     except Exception:
         return []
 
-def get_latest_history(n=2):
+def get_latest_history(n=2, country='all_other'):
+    fad_col, filing_col = COUNTRY_DB_COLUMNS.get(country, COUNTRY_DB_COLUMNS['all_other'])
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT bulletin_month, final_action_date, filing_date "
-                "FROM bulletin_history ORDER BY bulletin_month DESC LIMIT %s",
+                f"SELECT bulletin_month, {fad_col}, {filing_col} "
+                f"FROM bulletin_history ORDER BY bulletin_month DESC LIMIT %s",
                 (n,),
             )
             rows = cur.fetchall()
@@ -74,20 +84,45 @@ def get_latest_history(n=2):
     except Exception:
         return []
 
-def save_bulletin_history(month, fad, filing, url):
+def save_bulletin_history(month, countries, url):
+    """Save EB-2 history for all countries.
+    countries: {country_key: {'fad': str, 'filing': str}}"""
     try:
         conn = get_db_connection()
+        ao = countries.get('all_other', {})
+        ch = countries.get('china', {})
+        ind = countries.get('india', {})
+        mx = countries.get('mexico', {})
+        ph = countries.get('philippines', {})
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO bulletin_history (bulletin_month, final_action_date, filing_date, source_url)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO bulletin_history (
+                    bulletin_month, final_action_date, filing_date, source_url,
+                    fad_china, filing_china, fad_india, filing_india,
+                    fad_mexico, filing_mexico, fad_philippines, filing_philippines
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (bulletin_month) DO UPDATE SET
                     final_action_date = EXCLUDED.final_action_date,
                     filing_date = EXCLUDED.filing_date,
-                    source_url = EXCLUDED.source_url
+                    source_url = EXCLUDED.source_url,
+                    fad_china = EXCLUDED.fad_china,
+                    filing_china = EXCLUDED.filing_china,
+                    fad_india = EXCLUDED.fad_india,
+                    filing_india = EXCLUDED.filing_india,
+                    fad_mexico = EXCLUDED.fad_mexico,
+                    filing_mexico = EXCLUDED.filing_mexico,
+                    fad_philippines = EXCLUDED.fad_philippines,
+                    filing_philippines = EXCLUDED.filing_philippines
                 """,
-                (month, fad, filing, url),
+                (
+                    month, ao.get('fad'), ao.get('filing'), url,
+                    ch.get('fad'), ch.get('filing'),
+                    ind.get('fad'), ind.get('filing'),
+                    mx.get('fad'), mx.get('filing'),
+                    ph.get('fad'), ph.get('filing'),
+                ),
             )
         conn.commit()
         conn.close()

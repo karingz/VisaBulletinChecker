@@ -48,27 +48,47 @@ def extract_target_tables(soup):
         raise ValueError("Could not find the target tables in the bulletin page.")
     return tables
 
-def extract_eb2_all_other(soup):
-    """Extract EB-2 'All Other' priority dates from a bulletin page.
-    Returns (final_action_date, filing_date). filing_date is None for pre-2015."""
+COUNTRY_COLUMNS = {
+    'all_other': 1,
+    'china': 2,
+    'india': 3,
+    'mexico': 4,
+    'philippines': 5,
+}
+
+def extract_eb2_all_countries(soup):
+    """Extract EB-2 priority dates for all countries from a bulletin page.
+    Returns dict: {country: {'fad': str, 'filing': str|None}} or None."""
     try:
         tables = extract_target_tables(soup)
     except ValueError:
-        return None, None
+        return None
 
-    def _get_eb2_value(table):
+    def _get_eb2_row_values(table):
         for row in table.select("tr"):
             cells = row.find_all(["th", "td"])
             if not cells:
                 continue
             first_cell = cells[0].get_text(strip=True).replace('\xa0', ' ')
-            if "2nd" in first_cell and len(cells) > 1:
-                return cells[1].get_text(strip=True).replace('\xa0', ' ')
-        return None
+            if "2nd" in first_cell:
+                result = {}
+                for country, idx in COUNTRY_COLUMNS.items():
+                    if idx < len(cells):
+                        result[country] = cells[idx].get_text(strip=True).replace('\xa0', ' ')
+                return result
+        return {}
 
-    fad = _get_eb2_value(tables[0]) if tables else None
-    filing = _get_eb2_value(tables[1]) if len(tables) > 1 else None
-    return fad, filing
+    fad_vals = _get_eb2_row_values(tables[0]) if tables else {}
+    filing_vals = _get_eb2_row_values(tables[1]) if len(tables) > 1 else {}
+    return {c: {'fad': fad_vals.get(c), 'filing': filing_vals.get(c)} for c in COUNTRY_COLUMNS}
+
+def extract_eb2_all_other(soup):
+    """Extract EB-2 'All Other' priority dates. Backward-compatible wrapper."""
+    countries = extract_eb2_all_countries(soup)
+    if not countries:
+        return None, None
+    ao = countries.get('all_other', {})
+    return ao.get('fad'), ao.get('filing')
 
 # Formatting Functions
 def format_table_html(table):
@@ -203,15 +223,15 @@ def run_check(return_month=False, return_eb2=False):
         msg = append_last_updated_time(msg)
 
         if return_month and return_eb2:
-            fad, filing = extract_eb2_all_other(bulletin_soup)
-            return msg, f"{bulletin_year}-{bulletin_month}", fad, filing, matched_link
+            countries = extract_eb2_all_countries(bulletin_soup)
+            return msg, f"{bulletin_year}-{bulletin_month}", countries, matched_link
         if return_month:
             return msg, f"{bulletin_year}-{bulletin_month}"
         return msg
     except Exception as e:
         error_msg = f"<p>❌ An error occurred: {str(e)}</p>"
         if return_month and return_eb2:
-            return error_msg, "", None, None, None
+            return error_msg, "", None, None
         if return_month:
             return error_msg, ""
         return error_msg

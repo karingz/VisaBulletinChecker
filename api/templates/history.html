@@ -132,6 +132,41 @@
             margin-top: 2px;
         }
 
+        /* ── Country Selector ── */
+        .country-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .country-selector label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        .country-selector select {
+            padding: 6px 28px 6px 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: #e2e8f0;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            transition: border-color 0.15s;
+        }
+        .country-selector select:hover { border-color: #465fff; }
+        .country-selector select:focus-visible {
+            outline: 2px solid #465fff;
+            outline-offset: 2px;
+        }
+
         /* ── Range Buttons ── */
         .range-buttons {
             display: flex;
@@ -289,7 +324,7 @@
     <div class="container">
         <div class="page-title">
             <h1>EB-2 Priority Date History</h1>
-            <p>All Other chargeability — tracking priority date movement across {{ entry_count }} bulletin{{ 's' if entry_count != 1 else '' }}.</p>
+            <p>{{ country_label }} chargeability — tracking priority date movement across {{ entry_count }} bulletin{{ 's' if entry_count != 1 else '' }}.</p>
         </div>
 
         <!-- Chart -->
@@ -297,13 +332,25 @@
             <div class="card-header">
                 <div>
                     <div class="card-title">Priority Date Timeline</div>
-                    <div class="card-subtitle">EB-2 "All Other" — days behind current (0 = Current)</div>
+                    <div class="card-subtitle">EB-2 "{{ country_label }}" — days behind current (0 = Current)</div>
                 </div>
-                <div class="range-buttons">
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <div class="country-selector">
+                        <label for="country-select">Country</label>
+                        <select id="country-select" onchange="onCountryChange(this.value)">
+                            <option value="all_other"{{ ' selected' if current_country == 'all_other' }}>All Other</option>
+                            <option value="china"{{ ' selected' if current_country == 'china' }}>China</option>
+                            <option value="india"{{ ' selected' if current_country == 'india' }}>India</option>
+                            <option value="mexico"{{ ' selected' if current_country == 'mexico' }}>Mexico</option>
+                            <option value="philippines"{{ ' selected' if current_country == 'philippines' }}>Philippines</option>
+                        </select>
+                    </div>
+                    <div class="range-buttons">
                     <button class="range-btn" onclick="setRange('all', this)">All</button>
                     <button class="range-btn active" onclick="setRange('3y', this)">3Y</button>
                     <button class="range-btn" onclick="setRange('2y', this)">2Y</button>
                     <button class="range-btn" onclick="setRange('1y', this)">1Y</button>
+                    </div>
                 </div>
             </div>
             <div class="chart-wrap">
@@ -368,6 +415,26 @@
     </footer>
 
     <script>
+        // Country selector: persist via localStorage, sync with URL
+        function onCountryChange(value) {
+            localStorage.setItem('vbc_country', value);
+            var url = new URL(window.location.href);
+            if (value === 'all_other') { url.searchParams.delete('country'); }
+            else { url.searchParams.set('country', value); }
+            window.location.href = url.toString();
+        }
+        (function() {
+            var url = new URL(window.location.href);
+            var urlCountry = url.searchParams.get('country');
+            var stored = localStorage.getItem('vbc_country') || 'all_other';
+            if (!urlCountry && stored !== 'all_other') {
+                url.searchParams.set('country', stored);
+                window.location.replace(url.toString());
+                return;
+            }
+            if (urlCountry) localStorage.setItem('vbc_country', urlCountry);
+        })();
+
         function daysToYM(days) {
             if (days === 0) return 'C';
             var abs = Math.abs(days);

@@ -245,6 +245,41 @@
             color: #64748b !important;
         }
 
+        /* ── Country Selector ── */
+        .country-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .country-selector label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        .country-selector select {
+            padding: 6px 28px 6px 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: #e2e8f0;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            transition: border-color 0.15s;
+        }
+        .country-selector select:hover { border-color: #465fff; }
+        .country-selector select:focus-visible {
+            outline: 2px solid #465fff;
+            outline-offset: 2px;
+        }
+
         /* ── EB-2 Change Badge ── */
         .bulletin-content .eb2-row td.has-badge {
             display: flex;
@@ -453,34 +488,46 @@
             <p>Final Action Dates &amp; Dates for Filing, updated automatically from the U.S. Department of State.</p>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon blue"><i class="fa-solid fa-eye" aria-hidden="true"></i></div>
-                <div class="stat-label">Total Visits</div>
-                <div class="stat-value">{{ hits.total|int|comma }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon purple"><i class="fa-solid fa-calendar" aria-hidden="true"></i></div>
-                <div class="stat-label">Monthly</div>
-                <div class="stat-value">{{ hits.monthly|int|comma }}</div>
-                <div class="stat-sub">{{ current_month }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon emerald"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i></div>
-                <div class="stat-label">Today</div>
-                <div class="stat-value">{{ hits.daily|int|comma }}</div>
-                <div class="stat-sub">{{ current_date }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon amber"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
-                <div class="stat-label">Subscribers</div>
-                <div class="stat-value">{{ subscriber_count|int|comma }}</div>
-            </div>
-        </div>
-
         <main>
             <div class="card bulletin-content">
+                <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                    <div class="country-selector">
+                        <label for="country-select">Country</label>
+                        <select id="country-select" onchange="onCountryChange(this.value)">
+                            <option value="all_other"{{ ' selected' if current_country == 'all_other' }}>All Other</option>
+                            <option value="china"{{ ' selected' if current_country == 'china' }}>China</option>
+                            <option value="india"{{ ' selected' if current_country == 'india' }}>India</option>
+                            <option value="mexico"{{ ' selected' if current_country == 'mexico' }}>Mexico</option>
+                            <option value="philippines"{{ ' selected' if current_country == 'philippines' }}>Philippines</option>
+                        </select>
+                    </div>
+                </div>
                 {{ result|safe }}
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fa-solid fa-eye" aria-hidden="true"></i></div>
+                    <div class="stat-label">Total Visits</div>
+                    <div class="stat-value">{{ hits.total|int|comma }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fa-solid fa-calendar" aria-hidden="true"></i></div>
+                    <div class="stat-label">Monthly</div>
+                    <div class="stat-value">{{ hits.monthly|int|comma }}</div>
+                    <div class="stat-sub">{{ current_month }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon emerald"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i></div>
+                    <div class="stat-label">Today</div>
+                    <div class="stat-value">{{ hits.daily|int|comma }}</div>
+                    <div class="stat-sub">{{ current_date }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+                    <div class="stat-label">Subscribers</div>
+                    <div class="stat-value">{{ subscriber_count|int|comma }}</div>
+                </div>
             </div>
 
             <div class="card subscribe-card">
@@ -509,6 +556,49 @@
     </footer>
 
     <script>
+        // Country selector: persist via localStorage, sync with URL
+        function onCountryChange(value) {
+            localStorage.setItem('vbc_country', value);
+            var url = new URL(window.location.href);
+            if (value === 'all_other') { url.searchParams.delete('country'); }
+            else { url.searchParams.set('country', value); }
+            window.location.href = url.toString();
+        }
+        (function() {
+            var url = new URL(window.location.href);
+            var urlCountry = url.searchParams.get('country');
+            var stored = localStorage.getItem('vbc_country') || 'all_other';
+            if (!urlCountry && stored !== 'all_other') {
+                url.searchParams.set('country', stored);
+                window.location.replace(url.toString());
+                return;
+            }
+            if (urlCountry) localStorage.setItem('vbc_country', urlCountry);
+        })();
+
+        // Reorder bulletin table columns: move selected country to position 2
+        (function() {
+            var country = '{{ current_country }}';
+            if (country === 'all_other') return;
+            var HEADERS = { 'china': 'China', 'india': 'India', 'mexico': 'Mexico', 'philippines': 'Philippines' };
+            var target = HEADERS[country];
+            if (!target) return;
+            document.querySelectorAll('.bulletin-content table').forEach(function(table) {
+                var headerRow = table.querySelector('tr');
+                if (!headerRow) return;
+                var headers = headerRow.querySelectorAll('th');
+                if (headers.length < 3) return;
+                var colIdx = -1;
+                headers.forEach(function(th, i) { if (th.textContent.trim() === target) colIdx = i; });
+                if (colIdx <= 1) return;
+                table.querySelectorAll('tr').forEach(function(row) {
+                    var cells = Array.from(row.children);
+                    if (cells.length <= colIdx) return;
+                    row.insertBefore(cells[colIdx], cells[1]);
+                });
+            });
+        })();
+
         function updateButtonText() {
             var checkbox = document.getElementById('unsubscribe-checkbox');
             var button = document.getElementById('submit-button');

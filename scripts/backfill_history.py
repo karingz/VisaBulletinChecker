@@ -33,8 +33,16 @@ def get_db_connection():
     return psycopg2.connect(DB_URL)
 
 
-def extract_eb2_all_other(soup):
-    """Extract EB-2 'All Other' priority dates from a bulletin page."""
+COUNTRY_COLUMNS = {
+    'all_other': 1,
+    'china': 2,
+    'india': 3,
+    'mexico': 4,
+    'philippines': 5,
+}
+
+def extract_eb2_all_countries(soup):
+    """Extract EB-2 priority dates for all countries from a bulletin page."""
     tables = []
     for bold in soup.find_all("b"):
         text = bold.get_text()
@@ -44,21 +52,25 @@ def extract_eb2_all_other(soup):
                 tables.append(table)
 
     if not tables:
-        return None, None
+        return None
 
-    def _get_eb2_value(table):
+    def _get_eb2_row_values(table):
         for row in table.select("tr"):
             cells = row.find_all(["th", "td"])
             if not cells:
                 continue
             first_cell = cells[0].get_text(strip=True).replace('\xa0', ' ')
-            if "2nd" in first_cell and len(cells) > 1:
-                return cells[1].get_text(strip=True).replace('\xa0', ' ')
-        return None
+            if "2nd" in first_cell:
+                result = {}
+                for country, idx in COUNTRY_COLUMNS.items():
+                    if idx < len(cells):
+                        result[country] = cells[idx].get_text(strip=True).replace('\xa0', ' ')
+                return result
+        return {}
 
-    fad = _get_eb2_value(tables[0]) if tables else None
-    filing = _get_eb2_value(tables[1]) if len(tables) > 1 else None
-    return fad, filing
+    fad_vals = _get_eb2_row_values(tables[0])
+    filing_vals = _get_eb2_row_values(tables[1]) if len(tables) > 1 else {}
+    return {c: {'fad': fad_vals.get(c), 'filing': filing_vals.get(c)} for c in COUNTRY_COLUMNS}
 
 
 def find_all_bulletin_links():
@@ -169,25 +181,44 @@ def main():
             resp = requests.get(url, timeout=30)
             resp.raise_for_status()
             soup = BeautifulSoup(resp.content, "html.parser")
-            fad, filing = extract_eb2_all_other(soup)
+            countries = extract_eb2_all_countries(soup)
 
-            if fad is None:
+            if countries is None:
                 print(f"  SKIP (no EB-2 data): {month} — {url}")
                 skipped += 1
                 continue
 
+            ao = countries.get('all_other', {})
+            ch = countries.get('china', {})
+            ind = countries.get('india', {})
+            mx = countries.get('mexico', {})
+            ph = countries.get('philippines', {})
+
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO bulletin_history (bulletin_month, final_action_date, filing_date, source_url)
-                    VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (bulletin_month) DO NOTHING
+                    INSERT INTO bulletin_history (
+                        bulletin_month, final_action_date, filing_date, source_url,
+                        fad_china, filing_china, fad_india, filing_india,
+                        fad_mexico, filing_mexico, fad_philippines, filing_philippines
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    ON CONFLICT (bulletin_month) DO UPDATE SET
+                        final_action_date = EXCLUDED.final_action_date,
+                        filing_date = EXCLUDED.filing_date,
+                        fad_china = EXCLUDED.fad_china, filing_china = EXCLUDED.filing_china,
+                        fad_india = EXCLUDED.fad_india, filing_india = EXCLUDED.filing_india,
+                        fad_mexico = EXCLUDED.fad_mexico, filing_mexico = EXCLUDED.filing_mexico,
+                        fad_philippines = EXCLUDED.fad_philippines, filing_philippines = EXCLUDED.filing_philippines
                     """,
-                    (month, fad, filing, url),
+                    (month, ao.get('fad'), ao.get('filing'), url,
+                     ch.get('fad'), ch.get('filing'),
+                     ind.get('fad'), ind.get('filing'),
+                     mx.get('fad'), mx.get('filing'),
+                     ph.get('fad'), ph.get('filing')),
                 )
             conn.commit()
             inserted += 1
-            print(f"  OK: {month} — FAD={fad}, Filing={filing}")
+            print(f"  OK: {month} — FAD={ao.get('fad')}")
         except Exception as e:
             errors += 1
             print(f"  ERROR: {month} — {e}")

@@ -3,12 +3,20 @@ from flask import Flask, request, render_template
 from datetime import datetime
 
 from api.utils.bulletin import run_check
-from api.utils.db import get_cached_bulletin, save_cached_bulletin, get_bulletin_history, get_latest_history
+from api.utils.db import get_cached_bulletin, save_cached_bulletin, get_bulletin_history, get_latest_history, COUNTRY_DB_COLUMNS
 from api.utils.hits import update_hit_counts
 from api.utils.subscription import handle_subscription, get_subscriber_count, unsubscribe_email
 from api.utils.email import is_valid_email
 
 app = Flask(__name__)
+
+COUNTRY_LABELS = {
+    'all_other': 'All Other',
+    'china': 'China',
+    'india': 'India',
+    'mexico': 'Mexico',
+    'philippines': 'Philippines',
+}
 
 @app.route("/", methods=["GET", "POST"])
 def check_bulletin():
@@ -42,10 +50,15 @@ def check_bulletin():
             else:
                 subs_msg = "<p>❌ Invalid email address provided.</p>"
 
+    # Country selection
+    country = request.args.get('country', 'all_other')
+    if country not in COUNTRY_DB_COLUMNS:
+        country = 'all_other'
+
     # Compute EB-2 change from previous bulletin
     fad_diff_html = ''
     filing_diff_html = ''
-    latest = get_latest_history(2)
+    latest = get_latest_history(2, country=country)
     if len(latest) >= 2:
         curr, prev = latest[0], latest[1]
         fad_diff_html = compute_diff_html(
@@ -67,6 +80,8 @@ def check_bulletin():
         subs_msg=subs_msg,
         fad_diff=json.dumps(fad_diff_html),
         filing_diff=json.dumps(filing_diff_html),
+        current_country=country,
+        country_label=COUNTRY_LABELS[country],
     )
 
 @app.route("/unsubscribe", methods=["GET"])
@@ -131,7 +146,11 @@ def compute_diff_html(current_str, previous_str, current_month=None, previous_mo
 
 @app.route("/history")
 def history():
-    rows = get_bulletin_history()
+    country = request.args.get('country', 'all_other')
+    if country not in COUNTRY_DB_COLUMNS:
+        country = 'all_other'
+
+    rows = get_bulletin_history(country=country)
     history_data = []
     for i, row in enumerate(rows):
         entry = {
@@ -202,6 +221,8 @@ def history():
         chart_fad=json.dumps(chart_fad),
         chart_filing=json.dumps(chart_filing),
         entry_count=len(rows),
+        current_country=country,
+        country_label=COUNTRY_LABELS[country],
     )
 
 

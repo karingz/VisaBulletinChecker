@@ -68,21 +68,17 @@
             outline-offset: 2px;
             border-radius: 3px;
         }
-        @keyframes navGlow {
-            0%, 100% { box-shadow: 0 0 4px rgba(96,165,250,0.3), 0 0 10px rgba(96,165,250,0.15); }
-            50% { box-shadow: 0 0 8px rgba(96,165,250,0.5), 0 0 18px rgba(96,165,250,0.25); }
+        @keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 6px rgba(96,165,250,0.4), 0 0 14px rgba(96,165,250,0.2); }
+            50% { text-shadow: 0 0 10px rgba(96,165,250,0.7), 0 0 24px rgba(96,165,250,0.35); }
         }
         .topbar-links .nav-glow {
             color: #93c5fd;
-            border: 1px solid rgba(96,165,250,0.45);
-            border-radius: 8px;
-            padding: 5px 14px;
-            animation: navGlow 2.5s ease-in-out infinite;
+            animation: textGlow 2.5s ease-in-out infinite;
         }
         .topbar-links .nav-glow:hover {
             color: #bfdbfe;
-            border-color: rgba(96,165,250,0.7);
-            box-shadow: 0 0 10px rgba(96,165,250,0.5), 0 0 20px rgba(96,165,250,0.3);
+            text-shadow: 0 0 12px rgba(96,165,250,0.8), 0 0 28px rgba(96,165,250,0.4);
         }
 
         .container {

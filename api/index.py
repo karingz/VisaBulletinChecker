@@ -3,7 +3,7 @@ from flask import Flask, request, render_template
 from datetime import datetime
 
 from api.utils.bulletin import run_check
-from api.utils.db import get_cached_bulletin, save_cached_bulletin, get_bulletin_history
+from api.utils.db import get_cached_bulletin, save_cached_bulletin, get_bulletin_history, get_latest_history
 from api.utils.hits import update_hit_counts
 from api.utils.subscription import handle_subscription, get_subscriber_count, unsubscribe_email
 from api.utils.email import is_valid_email
@@ -42,6 +42,21 @@ def check_bulletin():
             else:
                 subs_msg = "<p>❌ Invalid email address provided.</p>"
 
+    # Compute EB-2 change from previous bulletin
+    fad_diff_html = ''
+    filing_diff_html = ''
+    latest = get_latest_history(2)
+    if len(latest) >= 2:
+        curr, prev = latest[0], latest[1]
+        fad_diff_html = compute_diff_html(
+            curr['final_action_date'], prev['final_action_date'],
+            curr['bulletin_month'], prev['bulletin_month']
+        )
+        filing_diff_html = compute_diff_html(
+            curr['filing_date'], prev['filing_date'],
+            curr['bulletin_month'], prev['bulletin_month']
+        )
+
     return render_template(
         "index.html",
         hits=hits,
@@ -50,6 +65,8 @@ def check_bulletin():
         current_date=datetime.utcnow().strftime('%Y-%m-%d'),
         result=result,
         subs_msg=subs_msg,
+        fad_diff=json.dumps(fad_diff_html),
+        filing_diff=json.dumps(filing_diff_html),
     )
 
 @app.route("/unsubscribe", methods=["GET"])

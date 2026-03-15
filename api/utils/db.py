@@ -56,6 +56,24 @@ def get_bulletin_history():
     except Exception:
         return []
 
+def get_latest_history(n=2):
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT bulletin_month, final_action_date, filing_date "
+                "FROM bulletin_history ORDER BY bulletin_month DESC LIMIT %s",
+                (n,),
+            )
+            rows = cur.fetchall()
+        conn.close()
+        return [
+            {"bulletin_month": r[0], "final_action_date": r[1], "filing_date": r[2]}
+            for r in rows
+        ]
+    except Exception:
+        return []
+
 def save_bulletin_history(month, fad, filing, url):
     try:
         conn = get_db_connection()

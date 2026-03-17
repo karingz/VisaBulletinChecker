@@ -20,6 +20,15 @@ def fetch_index_page():
         raise RuntimeError(f"Failed to fetch index page: {e}")
 
 def find_current_bulletin_link(soup):
+    # Check "Upcoming Visa Bulletin" first — when it has a link, it's the newest
+    for section in soup.find_all("li", class_="current"):
+        h2 = section.find("h2")
+        if h2 and "upcoming" in h2.get_text(strip=True).lower():
+            link = section.find("a", class_="btn btn-lg btn-success")
+            if link and link.get("href"):
+                return link.get("href")
+
+    # Fall back to "Current Visa Bulletin"
     current_section = soup.find("li", class_="current")
     if not current_section:
         raise ValueError("Could not find the 'Current Visa Bulletin' section.")
